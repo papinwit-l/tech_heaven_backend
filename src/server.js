@@ -4,6 +4,7 @@ const cors = require("cors");
 const morgan = require("morgan");
 const http = require("http");
 const { Server } = require("socket.io");
+const { readdirSync } = require("fs");
 
 const app = express();
 
@@ -25,6 +26,8 @@ io.on("connection", socketRoute(io));
 app.use(morgan("dev"));
 app.use(cors());
 app.use(express.json());
+
+readdirSync("./src/routes").map((path) => app.use("/", require(`./routes/${path}`)));
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
