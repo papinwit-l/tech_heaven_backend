@@ -27,7 +27,9 @@ app.use(morgan("dev"));
 app.use(cors());
 app.use(express.json());
 
-readdirSync("./src/routes").map((path) => app.use("/", require(`./routes/${path}`)));
+readdirSync("./src/routes").map((path) =>
+  app.use("/", require(`./routes/${path}`))
+);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
