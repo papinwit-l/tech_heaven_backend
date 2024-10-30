@@ -223,7 +223,13 @@ model Booking {
   updatedAt   DateTime      @updatedAt @map("updated_at")
   bookingDate DateTime      @map("booking_date")
   status      BookingStatus
+  type        BookingType
   notes       String?
+}
+
+enum BookingType {
+  CUSTOM_BUILD
+  REPAIR
 }
 
 enum BookingStatus {
