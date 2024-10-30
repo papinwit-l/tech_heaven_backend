@@ -25,7 +25,6 @@ model User {
   role          Role            @default(USER)
   createdAt     DateTime        @default(now()) @map("created_at")
   updatedAt     DateTime        @updatedAt @map("updated_at")
-  signupMethod  SignupMethod    @map("signup_method")
   UserPromotion UserPromotion[]
   ChatMembers   ChatMember[]
   Messages      Message[]
@@ -38,11 +37,6 @@ model User {
 enum Role {
   ADMIN
   USER
-}
-
-enum SignupMethod {
-  EMAIL
-  GOOGLE
 }
 
 model UserPromotion {
