@@ -1,11 +1,13 @@
 const { PrismaClientExtends } = require("@prisma/client/extension");
 const prisma = require("../config/prisma");
 
+//==== DISCONNECT ====
 module.exports.disconnect = (socket) => async (data) => {
   socket.disconnect();
   console.log("User disconnected");
 };
 
+//==== IDENTIFY ====
 module.exports.identify = (socket, io) => async (data) => {
   const userId = data.userId;
   if (!userId) {
@@ -44,6 +46,7 @@ module.exports.identify = (socket, io) => async (data) => {
   io.to(chat.id).emit("user_joined-" + userId, { message: "User joined" });
 };
 
+//==== SEND MESSAGE ====//
 module.exports.sendMessage = (socket, io) => async (data) => {
   const userId = data.userId;
   const chatId = data.chatId;
@@ -100,4 +103,54 @@ module.exports.sendMessage = (socket, io) => async (data) => {
     user: user,
     chatId: chat.id,
   });
+  socket.emit("notify-" + chatId, {
+    message: newMessage,
+    chatId: chat.id,
+    user: user,
+  });
+};
+
+//==== New Chat ====
+module.exports.newChat = (socket, io) => async (data) => {
+  const userId = data.userId;
+  const newChat = await prisma.chat.create({
+    data: {
+      name: data.name,
+    },
+  });
+
+  const chatMembers = await prisma.chatMember.create({
+    data: {
+      userId: userId,
+      chatId: newChat.id,
+    },
+  });
+
+  // user join chat
+  socket.join(newChat.id);
+
+  // force all admin to join chat
+  const admins = await prisma.user.findMany({
+    where: {
+      role: "ADMIN",
+    },
+  });
+
+  admins.map((admin) => {
+    socket.emit("to_join-" + admin.id, {
+      chatId: newChat.id,
+    });
+  });
+
+  io.to(newChat.id).emit("new_chat", {
+    chat: newChat,
+  });
+};
+
+//==== Join Chat ====
+module.exports.joinChat = (socket, io) => async (data) => {
+  const userId = data.userId;
+  const chatId = data.chatId;
+  socket.join(chatId);
+  io.to(chatId).emit("user_joined-" + userId, { message: "User joined" });
 };
