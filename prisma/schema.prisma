@@ -20,7 +20,7 @@ model User {
   lastName      String          @map("last_name")
   password      String
   dateOfBirth   DateTime        @map("date_of_birth")
-  profileImage  String          @map("profile_image")
+  profileImage  String?          @map("profile_image")
   role          Role            @default(USER)
   createdAt     DateTime        @default(now()) @map("created_at")
   updatedAt     DateTime        @updatedAt @map("updated_at")
