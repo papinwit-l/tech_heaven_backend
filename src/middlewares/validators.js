@@ -1,6 +1,7 @@
 const Joi = require('joi')
 const createError = require('../utils/createError')
 
+
 //Joi object
 
 //Auth path
@@ -62,12 +63,12 @@ const registerSchema = Joi.object({
         })
 })
 const loginSchema = Joi.object({
-    username: Joi
+    email: Joi
         .string()
         .required()
         .messages({
-            "string.empty": "Username is required.",
-            "string.base": "Username invalid."
+            "string.empty": "email is required.",
+            "string.base": "email invalid."
         }),
     password: Joi
         .string()
