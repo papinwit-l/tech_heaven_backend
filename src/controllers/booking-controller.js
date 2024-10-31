@@ -2,12 +2,13 @@ const prisma = require("../models/prisma");
 const trycatch = require("../utils/try-catch");
 
 exports.createBooking = trycatch(async (req, res) => {
-    const { bookingDate, type, notes, status } = req.body
+    console.log(req.body)
+    const { bookingDate, type, notes, status, userId } = req.body
     const booking = await prisma.booking.create({
         data: {
-            user: {
+            userId: {
                 connect: {
-                    id: req.body.userId
+                    id: Number(id)
                 }
             },
             bookingDate,
@@ -18,6 +19,7 @@ exports.createBooking = trycatch(async (req, res) => {
     })
 
     res.send("Booking created")
+    console.log(booking)
 })
 
 exports.getAllBookings = trycatch(async (req, res) => {
