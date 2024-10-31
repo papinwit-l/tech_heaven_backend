@@ -1,7 +1,16 @@
+const prisma = require("../config/prisma")
+
 exports.createCategory = async(req, res) => {
     try {
         // code
-        res.send("Hello createCategory")
+        const { name, description } = req.body
+        const category = await prisma.productCategory.create({
+            data: {
+                name: name,
+                description : description,
+            }
+        })
+        res.send(category)
     } catch (err) {
         console.log(err)
         res.status(500).json({ message : "Server error"})
@@ -11,7 +20,8 @@ exports.createCategory = async(req, res) => {
 exports.listCategory = async(req, res) => {
     try {
         // code
-        res.send("Hello listCategory")
+        const category = await prisma.productCategory.findMany()
+        res.send(category)
     } catch (err) {
         console.log(err)
         res.status(500).json({ message : "Server error"})
@@ -21,8 +31,13 @@ exports.listCategory = async(req, res) => {
 exports.removeCategory = async(req, res) => {
     try {
         // code
-        console.log(req.params.id)
-        res.send("Hello removeCategory")
+        const { id } = req.params
+        const category = await prisma.category.delete({
+            where: {
+                id: Number(id)
+            }
+        })
+        res.send(category)
     } catch (err) {
         console.log(err)
         res.status(500).json({ message : "Server error"})
