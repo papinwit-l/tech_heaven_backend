@@ -5,6 +5,11 @@ exports.createBooking = trycatch(async (req, res) => {
     const { bookingDate, type, notes, status } = req.body
     const booking = await prisma.booking.create({
         data: {
+            user: {
+                connect: {
+                    id: req.body.userId
+                }
+            },
             bookingDate,
             status,
             type,
