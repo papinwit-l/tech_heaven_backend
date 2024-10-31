@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs')
 const prisma = require('../config/prisma')
 const jwt = require('jsonwebtoken')
 const nodemailer = require('nodemailer')
+require('dotenv').config()
 
 
 module.exports.register = (async (req,res,next) => {
@@ -136,29 +137,29 @@ module.exports.loginGoogle = (async (req, res, next) => {
 module.exports.getMe = (async(req,res,next) => {
   res.status(200).json({ user: req.user });
 })
-// module.exports.forgetPassword = (async(req,res,next) => {
-//   const { email } = req.body
-//   const user = await prisma.user.findUnique({ where: { email } })
-//   if (!user) {
-//       return createError(404, "User not found")
-//   }
-//   const token = jwt.sign({ id: user.id }, process.env.SECRET_KEY, { expiresIn: '1h' });
+module.exports.forgetPassword = (async(req,res,next) => {
+  const { email } = req.body
+  const user = await prisma.user.findUnique({ where: { email } })
+  if (!user) {
+      return createError(404, "User not found")
+  }
+  const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-//   const transporter = nodemailer.createTransport({
-//       service: 'gmail', // Configure your email service
-//       auth: {
-//           user: process.env.EMAIL_USER,
-//           pass: process.env.EMAIL_PASS,
-//       }
-//   });
-//   const resetUrl = `${process.env.BASE_URL}/ResetPassword/${token}`;
-//   await transporter.sendMail({
-//       from: process.env.EMAIL_USER,
-//       to: user.email,
-//       subject: 'Password Reset Request',
-//       text: `Reset your password by clicking the link: ${resetUrl}`,
-//       html: ``
-//   })
-//   res.status(200).json({ message: "Password reset link sent to your email" });
-// })
+  const transporter = nodemailer.createTransport({
+      service: 'gmail', // Configure your email service
+      auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+      }
+  });
+  const resetUrl = `${process.env.BASE_URL}/resetPassword/${token}`;
+  await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: 'Password Reset Request',
+      text: `Reset your password by clicking the link: ${resetUrl}`,
+      html: ``
+  })
+  res.status(200).json({ message: "Password reset link sent to your email" });
+})
 
