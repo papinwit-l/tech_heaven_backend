@@ -59,6 +59,24 @@ exports.getBookingById = trycatch(async (req, res) => {
     res.send(booking)
 })
 
+exports.getBookingByUserId = trycatch(async (req, res) => {
+    const { id } = req.params
+    const bookings = await prisma.booking.findMany({
+        where: {
+            userId: Number(id)
+        },
+        include: {
+            user: {
+                select: {
+                    firstName: true,
+                    lastName: true
+                }
+            }
+        }
+    })
+    res.send(booking)
+})
+
 exports.updateBooking = trycatch(async (req, res) => {
     const { status } = req.body
     const { bookingId } = req.params
