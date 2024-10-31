@@ -2,7 +2,7 @@ const createError = require("../utils/createError")
 const bcrypt = require('bcryptjs')
 const prisma = require('../config/prisma')
 const jwt = require('jsonwebtoken')
-const { OAuth2Client } = require('google-auth-library');
+
 
 
 module.exports.register = (async (req,res,next) => {
@@ -69,3 +69,69 @@ module.exports.login = (async(req,res,next) =>{
         console.log(err)
     }
 })
+module.exports.loginGoogle = (async (req, res, next) => {
+  try {
+    console.log("check body -->",req.body)
+    const { email, given_name, family_name, picture } = req.body;
+    const user = await prisma.user.findFirst({
+      where: {
+        email: email,
+      },
+    });
+    console.log(user)
+    let newUser = null;
+    if(user){
+       newUser = await prisma.user.update({
+        where: {
+          email: email,
+        },data: {
+          email: email,
+          firstName: given_name,
+          lastName : family_name,
+          profileImage: picture,
+        }
+      });
+
+    }else{
+
+       newUser = await prisma.user.create({
+      data: {
+          email: email,
+          firstName: given_name,
+          lastName : family_name,
+          profileImage: picture,
+        }
+      });
+    }
+    const payload = {
+      id: newUser.id,
+      email: newUser.email,
+      role: newUser.role,
+      address: newUser.address,
+      firstName: newUser.firstName,
+      lastName : newUser.lastName,
+      profileImage : newUser.profileImage
+    };
+
+    jwt.sign(
+      payload,
+      process.env.JWT_SECRET,
+      { expiresIn: "30d" },
+      (err, token) => {
+        if (err) {
+          return createError(500, "Server Error");
+        }
+        res.json({ payload, token });
+      }
+    );
+
+
+  }catch(err){
+    next(err)
+    console.log(err)
+  }
+})
+module.exports.getMe = (async(req,res,next) => {
+  res.status(200).json({ user: req.user });
+})
+
