@@ -166,6 +166,7 @@ exports.createProductPowerSupply = async (req, res) => {
   }
 };
 
+// method POST //Case
 exports.createProductCase = async (req, res) => {
   const {name, description, price, categoryId, model, size} = req.body;
 
@@ -204,6 +205,7 @@ exports.createProductCase = async (req, res) => {
   }
 };
 
+// method POST //GPU
 exports.createProductGPU = async (req, res) => {
   const {name, description, price, categoryId, model} = req.body;
 
@@ -241,7 +243,7 @@ exports.createProductGPU = async (req, res) => {
   }
 };
 
-exports.createProductGPU = async (req, res) => {
+exports.createProductMemory = async (req, res) => {
   const {name, description, price, categoryId, model, memory, busSpeed, type} = req.body;
 
   try {
@@ -269,7 +271,7 @@ exports.createProductGPU = async (req, res) => {
 
     res.json({
       message:
-        "ProductGPU created successfully",
+        "ProductMemory created successfully",
       data: {
         product,
         itemMemory,
@@ -281,33 +283,88 @@ exports.createProductGPU = async (req, res) => {
   }
 };
 
+// method POST //Motherboard
+exports.createProductMotherboard = async (req, res) => {
+  const {name, description, price, categoryId, model, socket, chipset} = req.body;
 
-// // สร้าง Motherboard
-// const motherboard = await prisma.Motherboard.create({
-//   data: {
-//     name: name,
-//     model: motherboardModel,
-//     socket: motherboardSocket,
-//     chipset: motherboardChipset,
-//     formFactor: motherboardFormFactor,
-//     productId: product.id,
-//   },
-// });
+  try {
+    // สร้าง Product
+    const product = await prisma.Product.create({
+      data: {
+        name: name,
+        description: description,
+        price: parseFloat(price),
+        categoryId: +categoryId,
+      },
+    });
 
-// //  สร้าง Drive
-// const drive = await prisma.Drive.create({
-//   data: {
-//     name: name,
-//     model: driveModel,
-//     size: driveSize,
-//     type: driveType,
-//     speed: driveSpeed,
-//     productId: product.id,
-//   },
-// });
+    // สร้าง Motherboard
+    const motherboard = await prisma.Motherboard.create({
+      data: {
+        name: name,
+        model: model,
+        socket: socket,
+        chipset: chipset,
+        productId: product.id,
+      },
+    });
 
+    res.json({
+      message:
+        "ProductMotherboard created successfully",
+      data: {
+        product,
+        motherboard,
+      },
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
+// method POST //Drive
+exports.createProductDrive = async (req, res) => {
+  const {name, description, price, categoryId, model, size, type, speed} = req.body;
 
+  try {
+    // สร้าง Product
+    const product = await prisma.Product.create({
+      data: {
+        name: name,
+        description: description,
+        price: parseFloat(price),
+        categoryId: +categoryId,
+      },
+    });
+
+    //  สร้าง Drive
+    const drive = await prisma.Drive.create({
+      data: {
+        name: name,
+        model: model,
+        size: size,
+        type: type,
+        speed: speed,
+        productId: product.id,
+      },
+    });
+
+    res.json({
+      message:
+        "ProductDrive created successfully",
+      data: {
+        product,
+        drive,
+      },
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// ดูสินค้ารวม
 exports.listProducts = async (req, res) => {
   try {
     // code
@@ -326,6 +383,7 @@ exports.listProducts = async (req, res) => {
   }
 };
 
+// อัพเดตสินค้า
 exports.updateProduct = async (req, res) => {
   try {
     // code
@@ -336,6 +394,7 @@ exports.updateProduct = async (req, res) => {
   }
 };
 
+// ลบสินค้า
 exports.removeProduct = async (req, res) => {
   try {
     // code
@@ -352,6 +411,7 @@ exports.removeProduct = async (req, res) => {
   }
 };
 
+// ดูสินค้าบางรายการ
 exports.listByProduct = async (req, res) => {
   try {
     // code
@@ -362,6 +422,7 @@ exports.listByProduct = async (req, res) => {
   }
 };
 
+// ค้นหาสินค้า
 exports.searchFiltersProduct = async (req, res) => {
   try {
     // code
