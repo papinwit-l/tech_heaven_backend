@@ -8,5 +8,5 @@ authRouter.post('/login',loginValidator,authController.login)
 authRouter.post('/register-google',authController.loginGoogle)
 authRouter.get('/getme',authenticate.auth,authController.getMe)
 authRouter.post('/forgotPassword',authController.forgetPassword)
-// authRouter.put('/resetPassword/',authController.resetPassword)
+authRouter.put('/resetPassword/',authController.resetPassword)
 module.exports = authRouter

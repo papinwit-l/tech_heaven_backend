@@ -56,12 +56,12 @@ module.exports.login = (async(req,res,next) =>{
             return createError(400,"Wrong Password")
         }
         const PayloadToken = {
-            user : {
+         
                 id : user.id,
                 email : user.email,
                 role : user.role,
                 
-            }
+        
         }
         const token = jwt.sign(PayloadToken,process.env.JWT_SECRET, {
             expiresIn : "30d"
@@ -161,5 +161,16 @@ module.exports.forgetPassword = (async(req,res,next) => {
       html: ``
   })
   res.status(200).json({ message: "Password reset link sent to your email" });
+})
+module.exports.resetPassword = (async(req,res,next)=> {
+  const { password, token } = req.body
+    const payload = jwt.verify(token, process.env.JWT_SECRET)
+    console.log(payload)
+    const hashedPassword = await bcrypt.hash(password, 10)
+    const newPassword = await prisma.user.update({
+        where: { id: payload.id },
+        data: { password: hashedPassword }
+    })
+    res.json(200, "Password AlreadyChange")
 })
 
