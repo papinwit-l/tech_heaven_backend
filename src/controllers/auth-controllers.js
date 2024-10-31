@@ -69,7 +69,7 @@ module.exports.login = (async(req,res,next) =>{
         console.log(err)
     }
 })
-exports.loginGoogle = async (req, res, next) => {
+module.exports.loginGoogle = (async (req, res, next) => {
   try {
     console.log("check body -->",req.body)
     const { email, given_name, family_name, picture } = req.body;
@@ -129,4 +129,7 @@ exports.loginGoogle = async (req, res, next) => {
     next(err)
     console.log(err)
   }
-}
+})
+module.exports.getMe = (async(req,res,next) => {
+  res.status(200).json({ user: req.user });
+})
