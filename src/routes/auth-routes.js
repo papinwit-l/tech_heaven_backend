@@ -4,5 +4,6 @@ const authController =require('../controllers/auth-controllers')
 const {registerValidator, loginValidator} = require('../middlewares/validators')
 authRouter.post('/register',registerValidator,authController.register)
 authRouter.post('/login',loginValidator,authController.login)
+authRouter.post('/register-google',authController.loginGoogle)
 
 module.exports = authRouter
