@@ -36,13 +36,13 @@ app.use('/auth',authRouter)
 app.use('/booking', bookingRouter)
 
 
-app.use(errHandler)
-app.use('*',notFound)
 
 readdirSync("./src/routes").map((path) =>
   app.use("/", require(`./routes/${path}`))
 );
 
+app.use(errHandler)
+app.use('*',notFound)
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
