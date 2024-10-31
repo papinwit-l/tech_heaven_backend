@@ -21,7 +21,7 @@ model User {
   lastName      String          @map("last_name")
   password      String?
   dateOfBirth   DateTime        @map("date_of_birth")
-  profileImage  String?          @map("profile_image")
+  profileImage  String?         @map("profile_image")
   role          Role            @default(USER)
   createdAt     DateTime        @default(now()) @map("created_at")
   updatedAt     DateTime        @updatedAt @map("updated_at")
@@ -238,30 +238,30 @@ enum BookingStatus {
 }
 
 model PCBuild {
-  id            Int         @id @default(autoincrement())
-  user          User        @relation(fields: [userId], references: [id])
-  userId        Int         @map("user_id")
-  createdAt     DateTime    @default(now()) @map("created_at")
-  updatedAt     DateTime    @updatedAt @map("updated_at")
+  id            Int          @id @default(autoincrement())
+  user          User         @relation(fields: [userId], references: [id])
+  userId        Int          @map("user_id")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
   description   String?
-  cpu           CPU         @relation(fields: [cpuId], references: [id])
-  cpuId         Int         @map("cpu_id")
-  motherboard   Motherboard @relation(fields: [motherboardId], references: [id])
-  motherboardId Int         @map("motherboard_id")
-  gpu           GPU         @relation(fields: [gpuId], references: [id])
-  gpuId         Int         @map("gpu_id")
-  memory        Memory[]
-  memoryId      Int         @map("memory_id")
-  powerSupply   PowerSupply @relation(fields: [powerSupplyId], references: [id])
-  powerSupplyId Int         @map("power_supply_id")
-  case          Case        @relation(fields: [caseId], references: [id])
-  caseId        Int         @map("case_id")
-  drive         Drive[]
-  driveId       Int         @map("drive_id")
-  cpuCooler     CPUCooler   @relation(fields: [cpuCoolerId], references: [id])
-  cpuCoolerId   Int         @map("cpu_cooler_id")
-  monitor       Monitor[]
-  monitorId     Int         @map("monitor_id")
+  cpu           CPU?         @relation(fields: [cpuId], references: [id])
+  cpuId         Int?         @map("cpu_id")
+  motherboard   Motherboard? @relation(fields: [motherboardId], references: [id])
+  motherboardId Int?         @map("motherboard_id")
+  gpu           GPU?         @relation(fields: [gpuId], references: [id])
+  gpuId         Int?         @map("gpu_id")
+  memory        Memory?      @relation(fields: [memoryId], references: [id])
+  memoryId      Int?         @map("memory_id")
+  powerSupply   PowerSupply? @relation(fields: [powerSupplyId], references: [id])
+  powerSupplyId Int?         @map("power_supply_id")
+  case          Case?        @relation(fields: [caseId], references: [id])
+  caseId        Int?         @map("case_id")
+  drive         Drive?       @relation(fields: [driveId], references: [id])
+  driveId       Int?         @map("drive_id")
+  cpuCooler     CPUCooler?   @relation(fields: [cpuCoolerId], references: [id])
+  cpuCoolerId   Int?         @map("cpu_cooler_id")
+  monitor       Monitor?     @relation(fields: [monitorId], references: [id])
+  monitorId     Int?         @map("monitor_id")
   totalPrice    Float
 }
 
@@ -314,18 +314,17 @@ model GPU {
 }
 
 model Memory {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   name      String
   model     String
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  product   Product  @relation(fields: [productId], references: [id])
-  productId Int      @map("product_id")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  product   Product   @relation(fields: [productId], references: [id])
+  productId Int       @map("product_id")
   memory    Int
-  busSpeed  Int      @map("bus_speed")
+  busSpeed  Int       @map("bus_speed")
   type      String
-  PCBuild   PCBuild? @relation(fields: [PCBuildId], references: [id])
-  PCBuildId Int?
+  PCBuild   PCBuild[]
 }
 
 model PowerSupply {
@@ -366,8 +365,7 @@ model Drive {
   type      DriveType
   speed     String
   format    DriveFormat
-  PCBuild   PCBuild?    @relation(fields: [PCBuildId], references: [id])
-  PCBuildId Int?
+  PCBuild   PCBuild[]
 }
 
 enum DriveType {
@@ -402,17 +400,16 @@ enum CPUCoolerType {
 }
 
 model Monitor {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   name        String
   model       String
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-  product     Product  @relation(fields: [productId], references: [id])
-  productId   Int      @map("product_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  product     Product   @relation(fields: [productId], references: [id])
+  productId   Int       @map("product_id")
   size        Int
   resolution  String
-  refreshRate Int      @map("refresh_rate")
-  panelType   String   @map("panel_type")
-  PCBuild     PCBuild? @relation(fields: [PCBuildId], references: [id])
-  PCBuildId   Int?
+  refreshRate Int       @map("refresh_rate")
+  panelType   String    @map("panel_type")
+  PCBuild     PCBuild[]
 }
