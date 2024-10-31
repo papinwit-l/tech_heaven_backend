@@ -109,7 +109,8 @@ module.exports.loginGoogle = (async (req, res, next) => {
       role: newUser.role,
       address: newUser.address,
       firstName: newUser.firstName,
-      lastName : newUser.lastName
+      lastName : newUser.lastName,
+      profileImage : newUser.profileImage
     };
 
     jwt.sign(
@@ -133,3 +134,4 @@ module.exports.loginGoogle = (async (req, res, next) => {
 module.exports.getMe = (async(req,res,next) => {
   res.status(200).json({ user: req.user });
 })
+
