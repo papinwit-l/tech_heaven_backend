@@ -6,7 +6,7 @@ exports.createProductCPU = async (req, res) => {
 
   try {
     // สร้าง Product
-    const product = await prisma.Product.create({
+    const product = await prisma.product.create({
       data: {
         name: name,
         description: description,
@@ -16,7 +16,7 @@ exports.createProductCPU = async (req, res) => {
     });
 
     // สร้าง CPU
-    const cpu = await prisma.CPU.create({
+    const cpu = await prisma.cPU.create({
       data: {
         name: name,
         model: model,
@@ -50,7 +50,7 @@ exports.createProductMonitor = async (req, res) => {
 
   try {
     // สร้าง Product
-    const product = await prisma.Product.create({
+    const product = await prisma.product.create({
       data: {
         name: name,
         description: description,
@@ -60,7 +60,7 @@ exports.createProductMonitor = async (req, res) => {
     });
 
     // สร้าง Monitor
-    const monitor = await prisma.Monitor.create({
+    const monitor = await prisma.monitor.create({
       data: {
         name: name,
         model: model,
@@ -92,7 +92,7 @@ exports.createProductCPUCooler = async (req, res) => {
 
   try {
     // สร้าง Product
-    const product = await prisma.Product.create({
+    const product = await prisma.product.create({
       data: {
         name: name,
         description: description,
@@ -102,7 +102,7 @@ exports.createProductCPUCooler = async (req, res) => {
     });
 
     // สร้าง CPUCooler
-    const cpuCooler = await prisma.CPUCooler.create({
+    const cpuCooler = await prisma.cPUCooler.create({
       data: {
         name: name,
         model: model,
@@ -133,7 +133,7 @@ exports.createProductPowerSupply = async (req, res) => {
 
   try {
     // สร้าง Product
-    const product = await prisma.Product.create({
+    const product = await prisma.product.create({
       data: {
         name: name,
         description: description,
@@ -143,7 +143,7 @@ exports.createProductPowerSupply = async (req, res) => {
     });
 
     // สร้าง PowerSupply
-    const powerSupply = await prisma.PowerSupply.create({
+    const powerSupply = await prisma.powerSupply.create({
       data: {
         name: name,
         model: model,
@@ -172,7 +172,7 @@ exports.createProductCase = async (req, res) => {
 
   try {
     // สร้าง Product
-    const product = await prisma.Product.create({
+    const product = await prisma.product.create({
       data: {
         name: name,
         description: description,
@@ -182,7 +182,7 @@ exports.createProductCase = async (req, res) => {
     });
 
     // สร้าง Case
-    const caseItem = await prisma.Case.create({
+    const caseItem = await prisma.case.create({
       data: {
         name: name,
         model: model,
@@ -207,11 +207,11 @@ exports.createProductCase = async (req, res) => {
 
 // method POST //GPU
 exports.createProductGPU = async (req, res) => {
-  const {name, description, price, categoryId, model} = req.body;
+  const {name, description, price, categoryId, model, vram, power} = req.body;
 
   try {
     // สร้าง Product
-    const product = await prisma.Product.create({
+    const product = await prisma.product.create({
       data: {
         name: name,
         description: description,
@@ -221,10 +221,12 @@ exports.createProductGPU = async (req, res) => {
     });
 
     // สร้าง GPU
-    const gpu = await prisma.GPU.create({
+    const gpu = await prisma.gPU.create({
       data: {
         name: name,
         model: model,
+        vram: +vram,
+        power: +power,
         productId: product.id,
       },
     });
@@ -234,7 +236,7 @@ exports.createProductGPU = async (req, res) => {
         "ProductGPU created successfully",
       data: {
         product,
-        caseItem,
+        gpu,
       },
     });
   } catch (err) {
@@ -248,7 +250,7 @@ exports.createProductMemory = async (req, res) => {
 
   try {
     // สร้าง Product
-    const product = await prisma.Product.create({
+    const product = await prisma.product.create({
       data: {
         name: name,
         description: description,
@@ -258,7 +260,7 @@ exports.createProductMemory = async (req, res) => {
     });
 
     // สร้าง Memory
-    const itemMemory = await prisma.Memory.create({
+    const itemMemory = await prisma.memory.create({
       data: {
         name: name,
         model: model,
@@ -289,7 +291,7 @@ exports.createProductMotherboard = async (req, res) => {
 
   try {
     // สร้าง Product
-    const product = await prisma.Product.create({
+    const product = await prisma.product.create({
       data: {
         name: name,
         description: description,
@@ -299,7 +301,7 @@ exports.createProductMotherboard = async (req, res) => {
     });
 
     // สร้าง Motherboard
-    const motherboard = await prisma.Motherboard.create({
+    const motherboard = await prisma.motherboard.create({
       data: {
         name: name,
         model: model,
@@ -325,11 +327,11 @@ exports.createProductMotherboard = async (req, res) => {
 
 // method POST //Drive
 exports.createProductDrive = async (req, res) => {
-  const {name, description, price, categoryId, model, size, type, speed} = req.body;
+  const {name, description, price, categoryId, model, size, type, speed, format} = req.body;
 
   try {
     // สร้าง Product
-    const product = await prisma.Product.create({
+    const product = await prisma.product.create({
       data: {
         name: name,
         description: description,
@@ -339,13 +341,14 @@ exports.createProductDrive = async (req, res) => {
     });
 
     //  สร้าง Drive
-    const drive = await prisma.Drive.create({
+    const drive = await prisma.drive.create({
       data: {
         name: name,
         model: model,
         size: size,
         type: type,
         speed: speed,
+        format: format,
         productId: product.id,
       },
     });
@@ -364,7 +367,11 @@ exports.createProductDrive = async (req, res) => {
   }
 };
 
-// ดูสินค้ารวม
+
+// ---------------------------------------------//
+
+
+// method GET ดูสินค้าระบุจำนวน
 exports.listProducts = async (req, res) => {
   try {
     // code
@@ -373,56 +380,96 @@ exports.listProducts = async (req, res) => {
       take: parseInt(count),
       orderBy: { createdAt : "desc"},
       include: {
-        productCategory: true
+        ProductCategory: true
       }
     })
-    res.send(products);
+    res.json(products);
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// อัพเดตสินค้า
+// method PUT อัพเดตสินค้า
 exports.updateProduct = async (req, res) => {
+  const { id } = req.params
+  const { name, description, price, categoryId } = req.body
   try {
     // code
-    res.send("Hello update Product");
+    const updatedProduct = await prisma.product.update({
+      where: {
+        id: parseInt(id)
+      },
+      data: {
+        name: name,
+        description: description,
+        price: parseFloat(price),
+        categoryId: parseInt(categoryId),
+      },
+    })
+
+    res.json({
+      message: "Product updated successfully",
+      data: updatedProduct,
+    })
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// ลบสินค้า
+// method DELETE ลบสินค้า
 exports.removeProduct = async (req, res) => {
   try {
     // code
     const {id} = req.params
-    await prisma.product.delete({
+    const deletedProduct = await prisma.product.delete({
       where: {
         id: Number(id)
       }
     })
-    res.send("Hello Remove Product");
+
+    res.json({
+      message: "Product removed successfully",
+      data: deletedProduct,
+    });
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// ดูสินค้าบางรายการ
+// method POST ดูสินค้าบางรายการ
 exports.listByProduct = async (req, res) => {
   try {
     // code
-    res.send("Hello Listby Product");
+    const { categoryId } = req.body
+
+    const products = await prisma.product.findMany({
+      where: {
+        categoryId: Number(categoryId),
+      },
+      include: {
+        ProductCategory: true,
+      }
+    })
+
+  // ตรวจสอบว่ามีผลิตภัณฑ์หรือไม่
+  if (products.length === 0) {
+    return res.status(404).json({ message: "No products found" });
+  }
+  res.json({
+    message: "Products retrieved successfully",
+    data: products,
+  });
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// ค้นหาสินค้า
+
+// method POST ค้นหาสินค้า (!!!ยังไม่เสร็จ)
 exports.searchFiltersProduct = async (req, res) => {
   try {
     // code

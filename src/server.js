@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
 const cartRouter = require('./routes/cart-routes')
+
 const bookingRouter = require('./routes/booking-route')
 const authRouter = require('./routes/auth-routes')
 const errHandler = require('./middlewares/error')
