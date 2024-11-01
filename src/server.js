@@ -26,12 +26,14 @@ const io = new Server(server, {
 
 //import middleware
 const socketRoute = require("./routes/socket-route");
+const stripeRouter = require("./routes/stripe-route");
 
 io.on("connection", socketRoute(io));
 
 app.use(morgan("dev"));
 app.use(cors());
 app.use(express.json());
+app.use('/payment', stripeRouter)
 app.use("/auth", authRouter);
 app.use("/booking", bookingRouter);
 app.use("/cart", cartRouter);
