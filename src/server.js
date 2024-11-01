@@ -26,6 +26,7 @@ const io = new Server(server, {
 
 //import middleware
 const socketRoute = require("./routes/socket-route");
+const stripeRouter = require("./routes/stripe-route");
 
 //using socket
 io.on("connection", socketRoute(io));
@@ -35,7 +36,7 @@ app.use(express.json());
 app.use('/auth',authRouter)
 app.use('/booking', bookingRouter)
 
-
+app.use('/payment', stripeRouter)
 
 readdirSync("./src/routes").map((path) =>
   app.use("/", require(`./routes/${path}`))
