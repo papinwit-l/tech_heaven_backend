@@ -25,7 +25,7 @@ module.exports.identify = (socket, io) => async (data) => {
     return;
   }
   if (user.role === "USER") {
-    const member = await prisma.chatMember.findUnique({
+    const member = await prisma.chatMember.findFirst({
       where: {
         userId: +userId,
       },
@@ -45,6 +45,7 @@ module.exports.identify = (socket, io) => async (data) => {
         },
       });
       socket.join(newChat.id);
+      console.log("join chat: " + newChat.id);
     }
     const chat = await prisma.chat.findUnique({
       where: {
@@ -52,6 +53,7 @@ module.exports.identify = (socket, io) => async (data) => {
       },
     });
     socket.join(chat.id);
+    console.log("join chat: " + chat.id);
     return;
   }
   if (user.role === "ADMIN") {
