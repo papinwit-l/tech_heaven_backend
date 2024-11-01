@@ -2,13 +2,15 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
-const http = require("http");
-const { Server } = require("socket.io");
 
+const bookingRouter = require("./routes/booking-route");
 const authRouter = require("./routes/auth-routes");
 const errHandler = require("./middlewares/error");
 const notFound = require("./middlewares/notFound");
 const app = express();
+
+const http = require("http");
+const { Server } = require("socket.io");
 
 const { readdirSync } = require("fs");
 
@@ -36,6 +38,7 @@ app.use(morgan("dev"));
 app.use(cors());
 app.use(express.json());
 app.use("/auth", authRouter);
+app.use("/booking", bookingRouter);
 
 readdirSync("./src/routes").map((path) =>
   app.use("/", require(`./routes/${path}`))
