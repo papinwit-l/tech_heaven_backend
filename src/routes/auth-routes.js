@@ -7,6 +7,6 @@ authRouter.post('/register',registerValidator,authController.register)
 authRouter.post('/login',loginValidator,authController.login)
 authRouter.post('/register-google',authController.loginGoogle)
 authRouter.get('/getme',authenticate.auth,authController.getMe)
-// authRouter.post('/resetPassword',authController.getLinkReset)
-// authRouter.put('/resetPassword/',authController.resetPassword)
+authRouter.post('/forgotPassword',authController.forgotPassword)
+authRouter.put('/resetPassword/',authController.resetPassword)
 module.exports = authRouter

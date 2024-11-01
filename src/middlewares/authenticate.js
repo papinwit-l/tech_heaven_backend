@@ -15,8 +15,7 @@ module.exports.auth = async (req, res, next) => {
   }
   // console.log("object",accessToken)
   const payload = jwt.verify(accessToken, process.env.JWT_SECRET);
-  // console.log(payload,'111111111111111111111111111111')
-  console.log(payload);
+  console.log(payload, "111111111111111111111111111111");
   const user = await prisma.user.findUnique({ where: { id: payload.id } });
   if (!user) {
     createError(401, "unauthenticated user not found");
