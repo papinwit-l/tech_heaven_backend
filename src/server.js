@@ -2,7 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
-
+const cartRouter = require('./routes/cart-routes')
 const bookingRouter = require('./routes/booking-route')
 const authRouter = require('./routes/auth-routes')
 const errHandler = require('./middlewares/error')
@@ -34,6 +34,7 @@ app.use(cors())
 app.use(express.json());
 app.use('/auth',authRouter)
 app.use('/booking', bookingRouter)
+app.use('/cart',cartRouter)
 
 
 

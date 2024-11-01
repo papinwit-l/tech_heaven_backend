@@ -137,7 +137,7 @@ module.exports.loginGoogle = (async (req, res, next) => {
 module.exports.getMe = (async(req,res,next) => {
   res.status(200).json({ user: req.user });
 })
-module.exports.forgetPassword = (async(req,res,next) => {
+module.exports.forgotPassword = (async(req,res,next) => {
   const { email } = req.body
   const user = await prisma.user.findUnique({ where: { email } })
   if (!user) {
@@ -152,7 +152,7 @@ module.exports.forgetPassword = (async(req,res,next) => {
           pass: process.env.EMAIL_PASS,
       }
   });
-  const resetUrl = `${process.env.BASE_URL}/resetPassword/${token}`;
+  const resetUrl = `${process.env.BASE_URL}/reset-Password/${token}`;
   await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: user.email,
@@ -162,15 +162,24 @@ module.exports.forgetPassword = (async(req,res,next) => {
   })
   res.status(200).json({ message: "Password reset link sent to your email" });
 })
-module.exports.resetPassword = (async(req,res,next)=> {
-  const { password, token } = req.body
-    const payload = jwt.verify(token, process.env.JWT_SECRET)
-    console.log(payload)
-    const hashedPassword = await bcrypt.hash(password, 10)
-    const newPassword = await prisma.user.update({
-        where: { id: payload.id },
-        data: { password: hashedPassword }
-    })
-    res.json(200, "Password AlreadyChange")
-})
+module.exports.resetPassword = async (req, res, next) => {
+  const { password, token } = req.body;
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    console.log(payload);
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await prisma.user.update({
+      where: { id: payload.id },
+      data: { password: hashedPassword },
+    });
+
+    // Send a response only if there is no error
+    return res.status(200).json({ message: "Password successfully changed" });
+  } catch (err) {
+    // Pass the error to the error-handling middleware
+    next(err);
+  }
+};
+
 
