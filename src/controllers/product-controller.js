@@ -3,6 +3,8 @@ const prisma = require("../config/prisma");
 // method POST //CPU
 exports.createProductCPU = async (req, res) => {
   const {name, description, price, categoryId, model, socket, cores, threads, baseClock, boostClock} = req.body;
+  const user =  req.user
+  console.log(user)
 
   try {
     // สร้าง Product
@@ -384,6 +386,27 @@ exports.listProducts = async (req, res) => {
       }
     })
     res.json(products);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// method GET ดูสินค้ารวม
+exports.readProduct = async (req, res) => {
+  try {
+    // code
+    const { id } = req.params
+    const product = await prisma.product.findFirst({
+      where: {
+        id: Number(id)
+      },
+      include: {
+        ProductCategory: true,
+        ProductImages: true,
+      }
+    })
+    res.json(product);
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Server error" });

@@ -32,7 +32,7 @@ exports.removeCategory = async(req, res) => {
     try {
         // code
         const { id } = req.params
-        const category = await prisma.category.delete({
+        const category = await prisma.productCategory.delete({
             where: {
                 id: Number(id)
             }
