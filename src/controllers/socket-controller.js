@@ -9,7 +9,8 @@ module.exports.disconnect = (socket) => async (data) => {
 
 //==== IDENTIFY ====
 module.exports.identify = (socket, io) => async (data) => {
-  const userId = data.userId;
+  console.log(data);
+  const userId = data.user.id;
   if (!userId) {
     socket.emit("error", { message: "User ID is required" });
     return;
@@ -23,27 +24,56 @@ module.exports.identify = (socket, io) => async (data) => {
     socket.emit("error", { message: "User not found" });
     return;
   }
-  const chatMembers = await prisma.chatMember.findUnique({
-    where: {
-      userId: user.id,
-    },
-  });
-  if (!chatMembers) {
-    socket.emit("error", { message: "User not found" });
+  if (user.role === "USER") {
+    const member = await prisma.chatMember.findUnique({
+      where: {
+        userId: +userId,
+      },
+    });
+    if (!member) {
+      socket.emit("error", { message: "Member User not found" });
+      // create chat
+      const newChat = await prisma.chat.create({
+        data: {
+          name: "New Chat",
+        },
+      });
+      const newMember = await prisma.chatMember.create({
+        data: {
+          userId: +userId,
+          chatId: newChat.id,
+        },
+      });
+      socket.join(newChat.id);
+    }
+    const chat = await prisma.chat.findUnique({
+      where: {
+        id: +member.chatId,
+      },
+    });
+    socket.join(chat.id);
     return;
   }
-  const chat = await prisma.chat.findUnique({
-    where: {
-      id: +chatMembers.chatId,
-    },
-  });
-  if (!chat) {
-    socket.emit("error", { message: "Chat not found" });
-    return;
+  if (user.role === "ADMIN") {
+    const allUserChats = await prisma.chatMember.findMany({
+      where: {
+        userId: +userId,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            role: true,
+          },
+        },
+      },
+    });
+    socket.emit("test", {
+      chats: allUserChats,
+    });
   }
-  socket.join(chat.id);
-
-  io.to(chat.id).emit("user_joined-" + userId, { message: "User joined" });
 };
 
 //==== SEND MESSAGE ====//
