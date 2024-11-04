@@ -417,7 +417,8 @@ module.exports.listProducts = async (req, res, next) => {
       take: parseInt(count),
       orderBy: { createdAt : "desc"},
       include: {
-        ProductCategory: true
+        ProductCategory: true,
+        ProductImages: true,
       }
     })
     res.json(products);
