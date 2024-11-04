@@ -1,17 +1,22 @@
+
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 // User data
 const userData = [
   {
-    username: "john_doe",
-    email: "john@example.com",
+    firstName: "john",
+    lastName : "doe",
+    email: "user@example.com",
     password: "securepassword",
+    role : "USER"
   },
   {
-    username: "jane_smith",
-    email: "jane@example.com",
+    firstName: "jan",
+    lastName : "doe",
+    email: "admin@example.com",
     password: "anothersecurepassword",
+    role : "ADMIN"
   },
   // Add additional users as needed...
 ];
@@ -117,6 +122,7 @@ async function addProducts() {
     console.error("Error adding products:", error);
   } finally {
     await prisma.$disconnect();
+
   }
 }
 
