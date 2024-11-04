@@ -1,164 +1,129 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-async function main() {
-  // Seed Users
-  const user1 = await prisma.user.create({
-    data: {
-      email: "john.doe@example.com",
-      googleId: "1234567890",
-      firstName: "John",
-      lastName: "Doe",
-      password: "password123",
-      dateOfBirth: new Date("1990-01-01"),
-      profileImage: "https://example.com/profile1.jpg",
-      role: "USER",
-    },
-  });
+// User data
+const userData = [
+  {
+    username: "john_doe",
+    email: "john@example.com",
+    password: "securepassword",
+  },
+  {
+    username: "jane_smith",
+    email: "jane@example.com",
+    password: "anothersecurepassword",
+  },
+  // Add additional users as needed...
+];
 
-  const user2 = await prisma.user.create({
-    data: {
-      email: "jane.doe@example.com",
-      firstName: "Jane",
-      lastName: "Doe",
-      dateOfBirth: new Date("1995-06-15"),
-      role: "USER",
+// Product data
+const productData = [
+  {
+    name: "Gaming Laptop",
+    description: "High performance gaming laptop with latest GPU and CPU.",
+    price: 1500.0,
+    categoryId: 1,
+    images: {
+      create: [
+        { imageUrl: "https://picsum.photos/id/1/400/400" },
+        { imageUrl: "https://picsum.photos/id/2/400/400" },
+      ],
     },
-  });
-
-  // Seed Product Categories
-  const category1 = await prisma.productCategory.create({
-    data: {
-      name: "Electronics",
-      description: "Gadgets and devices",
+  },
+  {
+    name: "Wireless Mouse",
+    description: "Ergonomic wireless mouse with customizable buttons.",
+    price: 50.0,
+    categoryId: 2,
+    images: {
+      create: [
+        { imageUrl: "https://picsum.photos/id/5/400/400" },
+        { imageUrl: "https://picsum.photos/id/6/400/400" },
+      ],
     },
-  });
-
-  const category2 = await prisma.productCategory.create({
-    data: {
-      name: "PC Components",
-      description: "Parts for custom PC builds",
+  },
+  {
+    name: "Mechanical Keyboard",
+    description: "RGB mechanical keyboard with customizable lighting.",
+    price: 120.0,
+    categoryId: 2,
+    images: {
+      create: [
+        { imageUrl: "https://picsum.photos/id/10/400/400" },
+        { imageUrl: "https://picsum.photos/id/11/400/400" },
+      ],
     },
-  });
-
-  // Seed Products
-  const product1 = await prisma.product.create({
-    data: {
-      name: "Gaming Laptop",
-      description: "High performance laptop for gaming",
-      price: 1500.0,
-      categoryId: category1.id,
+  },
+  {
+    name: "4K Gaming Monitor",
+    description: "Ultra HD gaming monitor with fast refresh rate.",
+    price: 700.0,
+    categoryId: 3,
+    images: {
+      create: [
+        { imageUrl: "https://picsum.photos/id/15/400/400" },
+        { imageUrl: "https://picsum.photos/id/16/400/400" },
+      ],
     },
-  });
-
-  const product2 = await prisma.product.create({
-    data: {
-      name: "Graphics Card",
-      description: "High-end GPU for gaming",
-      price: 500.0,
-      categoryId: category2.id,
+  },
+  {
+    name: "Gaming Headset",
+    description: "Surround sound gaming headset with noise cancellation.",
+    price: 80.0,
+    categoryId: 2,
+    images: {
+      create: [
+        { imageUrl: "https://picsum.photos/id/20/400/400" },
+        { imageUrl: "https://picsum.photos/id/21/400/400" },
+      ],
     },
-  });
-
-  // Seed Promotions
-  const promotion1 = await prisma.promotion.create({
-    data: {
-      title: "New User Discount",
-      description: "10% off for new users",
-      imageUrl: "https://example.com/promo1.jpg",
-      promotionDiscount: 10.0,
-      discountType: "PERCENTAGE",
-      startDate: new Date("2024-01-01"),
-      expirationDate: new Date("2024-12-31"),
-      promotionType: "NEW_USER",
-      promotionCode: "WELCOME10",
+  },
+  {
+    name: "Solid State Drive (SSD)",
+    description: "1TB SSD for faster load times and performance.",
+    price: 150.0,
+    categoryId: 4,
+    images: {
+      create: [
+        { imageUrl: "https://picsum.photos/id/25/400/400" },
+        { imageUrl: "https://picsum.photos/id/26/400/400" },
+      ],
     },
-  });
+  },
+];
 
-  // Seed User Promotions
-  await prisma.userPromotion.create({
-    data: {
-      userId: user1.id,
-      promotionId: promotion1.id,
-      redeemedAt: new Date("2024-01-15"),
-    },
-  });
-
-  // Seed Carts and CartItems
-  const cart1 = await prisma.cart.create({
-    data: {
-      userId: user1.id,
-      status: "PENDING",
-      total: 2000.0,
-      CartItems: {
-        create: [
-          {
-            productId: product1.id,
-            quantity: 1,
-            price: 1500.0,
-            total: 1500.0,
-          },
-          {
-            productId: product2.id,
-            quantity: 1,
-            price: 500.0,
-            total: 500.0,
-          },
-        ],
-      },
-    },
-  });
-
-  // Seed Orders and OrderItems
-  const order1 = await prisma.order.create({
-    data: {
-      userId: user1.id,
-      status: "PENDING",
-      paymentMethod: "CREDIT_CARD",
-      OrderItems: {
-        create: [
-          {
-            productId: product1.id,
-            quantity: 1,
-          },
-        ],
-      },
-    },
-  });
-
-  // Seed Chat, Chat Members, and Messages
-  const chat1 = await prisma.chat.create({
-    data: {
-      name: "General Chat",
-      ChatMembers: {
-        create: [
-          { userId: user1.id },
-          { userId: user2.id },
-        ],
-      },
-      Messages: {
-        create: [
-          {
-            userId: user1.id,
-            message: "Hello, welcome to the chat!",
-          },
-          {
-            userId: user2.id,
-            message: "Thanks! Happy to be here.",
-          },
-        ],
-      },
-    },
-  });
-
-  console.log("Data seeded successfully.");
+// Function to add users
+async function addUsers() {
+  try {
+    await prisma.user.createMany({
+      data: userData,
+      skipDuplicates: true, // Skip duplicates if they exist
+    });
+    console.log("Users added successfully.");
+  } catch (error) {
+    console.error("Error adding users:", error);
+  }
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
+// Function to add products
+async function addProducts() {
+  try {
+    await prisma.product.createMany({
+      data: productData,
+      skipDuplicates: true, // Optional: skip products that already exist
+    });
+    console.log("Products added successfully.");
+  } catch (error) {
+    console.error("Error adding products:", error);
+  } finally {
     await prisma.$disconnect();
-  });
+  }
+}
+
+// Execute functions
+async function run() {
+  await addUsers();
+  await addProducts();
+}
+
+run();

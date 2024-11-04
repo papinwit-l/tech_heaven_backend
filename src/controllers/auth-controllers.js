@@ -5,7 +5,6 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 require("dotenv").config();
 
-
 // Import Cloudinary
 const cloudinary = require("../config/cloudinary");
 const fs = require("fs");
