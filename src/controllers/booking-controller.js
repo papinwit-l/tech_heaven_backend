@@ -1,7 +1,7 @@
 const prisma = require("../models/prisma");
-const trycatch = require("../utils/try-catch");
+const tryCatch = require("../utils/try-catch");
 
-exports.createBooking = trycatch(async (req, res) => {
+exports.createBooking = tryCatch(async (req, res) => {
     console.log(req.body);
     const { bookingDate, type, notes, status } = req.body;
     if (!req.user || !req.user.id) {
@@ -30,10 +30,8 @@ exports.createBooking = trycatch(async (req, res) => {
     }
 });
 
-exports.getAllBookings = trycatch(async (req, res) => {
-    const { count } = req.params
+exports.getAllBookings = tryCatch(async (req, res) => {
     const bookings = await prisma.booking.findMany({
-        take: parseInt(count),
         orderBy: {
             createdAt: "desc"
         },
@@ -49,7 +47,7 @@ exports.getAllBookings = trycatch(async (req, res) => {
     res.send(bookings)
 })
 
-exports.getBookingById = trycatch(async (req, res) => {
+exports.getBookingById = tryCatch(async (req, res) => {
     const { bookingId } = req.params
     const booking = await prisma.booking.findUnique({
         where: {
@@ -59,7 +57,26 @@ exports.getBookingById = trycatch(async (req, res) => {
     res.send(booking)
 })
 
-exports.updateBooking = trycatch(async (req, res) => {
+exports.getBookingByUserId = tryCatch(async (req, res) => {
+    const userId = req.user.id;
+    const bookings = await prisma.booking.findMany({
+        where: {
+            userId: Number(userId)
+        },
+        include: {
+            user: {
+                select: {
+                    firstName: true,
+                    lastName: true
+                }
+            }
+        }
+    });
+    res.send(bookings);
+});
+
+
+exports.updateBooking = tryCatch(async (req, res) => {
     const { status } = req.body
     const { bookingId } = req.params
     const booking = await prisma.booking.update({
