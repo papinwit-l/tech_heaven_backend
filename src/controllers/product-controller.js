@@ -1,10 +1,15 @@
 const prisma = require("../config/prisma");
+const createError = require("../utils/createError");
 
 // method POST //CPU
-exports.createProductCPU = async (req, res) => {
-  const {name, description, price, categoryId, model, socket, cores, threads, baseClock, boostClock} = req.body;
-
+module.exports.createProductCPU = async (req, res, next) => {
+  
   try {
+    const {name, description, price, categoryId, model, socket, cores, threads, baseClock, boostClock} = req.body;
+    const role =  req.user.role
+    if(role !== "ADMIN") {
+      return createError(403, "forbidden")
+    }
     // สร้าง Product
     const product = await prisma.product.create({
       data: {
@@ -40,15 +45,19 @@ exports.createProductCPU = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: "Server error" });
+    next(err)
   }
 };
 
 // method POST //Monitor
-exports.createProductMonitor = async (req, res) => {
-  const {name, description, price, categoryId, model, size, resolution, refreshRate, panelType} = req.body;
-
+module.exports.createProductMonitor = async (req, res, next) => {
+  
   try {
+    const {name, description, price, categoryId, model, size, resolution, refreshRate, panelType} = req.body;
+    const role =  req.user.role
+    if(role !== "ADMIN") {
+      return createError(403, "forbidden")
+    }
     // สร้าง Product
     const product = await prisma.product.create({
       data: {
@@ -82,15 +91,19 @@ exports.createProductMonitor = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: "Server error" });
+    next(err)
   }
 };
 
 // method POST //CPUCooler
-exports.createProductCPUCooler = async (req, res) => {
-  const {name, description, price, categoryId, model, socket, radiator, type} = req.body;
-
+module.exports.createProductCPUCooler = async (req, res, next) => {
+  
   try {
+    const {name, description, price, categoryId, model, socket, radiator, type} = req.body;
+    const role =  req.user.role
+    if(role !== "ADMIN") {
+      return createError(403, "forbidden")
+    }
     // สร้าง Product
     const product = await prisma.product.create({
       data: {
@@ -123,15 +136,19 @@ exports.createProductCPUCooler = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: "Server error" });
+    next(err)
   }
 };
 
 // method POST //PowerSupply
-exports.createProductPowerSupply = async (req, res) => {
-  const {name, description, price, categoryId, model, wattage} = req.body;
-
+module.exports.createProductPowerSupply = async (req, res, next) => {
+  
   try {
+    const {name, description, price, categoryId, model, wattage} = req.body;
+    const role =  req.user.role
+    if(role !== "ADMIN") {
+      return createError(403, "forbidden")
+    }
     // สร้าง Product
     const product = await prisma.product.create({
       data: {
@@ -162,15 +179,19 @@ exports.createProductPowerSupply = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: "Server error" });
+    next(err)
   }
 };
 
 // method POST //Case
-exports.createProductCase = async (req, res) => {
-  const {name, description, price, categoryId, model, size} = req.body;
-
+module.exports.createProductCase = async (req, res, next) => {
+  
   try {
+    const {name, description, price, categoryId, model, size} = req.body;
+    const role =  req.user.role
+    if(role !== "ADMIN") {
+      return createError(403, "forbidden")
+    }
     // สร้าง Product
     const product = await prisma.product.create({
       data: {
@@ -201,15 +222,19 @@ exports.createProductCase = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: "Server error" });
+    next(err)
   }
 };
 
 // method POST //GPU
-exports.createProductGPU = async (req, res) => {
-  const {name, description, price, categoryId, model, vram, power} = req.body;
-
+module.exports.createProductGPU = async (req, res, next) => {
+  
   try {
+    const {name, description, price, categoryId, model, vram, power} = req.body;
+    const role =  req.user.role
+    if(role !== "ADMIN") {
+      return createError(403, "forbidden")
+    }
     // สร้าง Product
     const product = await prisma.product.create({
       data: {
@@ -241,14 +266,18 @@ exports.createProductGPU = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: "Server error" });
+    next(err)
   }
 };
 
-exports.createProductMemory = async (req, res) => {
-  const {name, description, price, categoryId, model, memory, busSpeed, type} = req.body;
-
+module.exports.createProductMemory = async (req, res, next) => {
+  
   try {
+    const {name, description, price, categoryId, model, memory, busSpeed, type} = req.body;
+    const role =  req.user.role
+    if(role !== "ADMIN") {
+      return createError(403, "forbidden")
+    }
     // สร้าง Product
     const product = await prisma.product.create({
       data: {
@@ -281,15 +310,19 @@ exports.createProductMemory = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: "Server error" });
+    next(err)
   }
 };
 
 // method POST //Motherboard
-exports.createProductMotherboard = async (req, res) => {
-  const {name, description, price, categoryId, model, socket, chipset} = req.body;
-
+module.exports.createProductMotherboard = async (req, res, next) => {
+  
   try {
+    const {name, description, price, categoryId, model, socket, chipset} = req.body;
+    const role =  req.user.role
+    if(role !== "ADMIN") {
+      return createError(403, "forbidden")
+    }
     // สร้าง Product
     const product = await prisma.product.create({
       data: {
@@ -321,15 +354,19 @@ exports.createProductMotherboard = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: "Server error" });
+    next(err)
   }
 };
 
 // method POST //Drive
-exports.createProductDrive = async (req, res) => {
-  const {name, description, price, categoryId, model, size, type, speed, format} = req.body;
-
+module.exports.createProductDrive = async (req, res, next) => {
+  
   try {
+    const {name, description, price, categoryId, model, size, type, speed, format} = req.body;
+    const role =  req.user.role
+    if(role !== "ADMIN") {
+      return createError(403, "forbidden")
+    }
     // สร้าง Product
     const product = await prisma.product.create({
       data: {
@@ -363,7 +400,7 @@ exports.createProductDrive = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: "Server error" });
+    next(err)
   }
 };
 
@@ -372,7 +409,7 @@ exports.createProductDrive = async (req, res) => {
 
 
 // method GET ดูสินค้าระบุจำนวน
-exports.listProducts = async (req, res) => {
+module.exports.listProducts = async (req, res, next) => {
   try {
     // code
     const { count } = req.params
@@ -380,21 +417,47 @@ exports.listProducts = async (req, res) => {
       take: parseInt(count),
       orderBy: { createdAt : "desc"},
       include: {
-        ProductCategory: true
+        ProductCategory: true,
+        ProductImages: true,
       }
     })
     res.json(products);
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: "Server error" });
+    next(err)
+  }
+};
+
+// method GET ดูสินค้ารวม
+module.exports.readProduct = async (req, res, next) => {
+  try {
+    // code
+    const { id } = req.params
+    const product = await prisma.product.findFirst({
+      where: {
+        id: Number(id)
+      },
+      include: {
+        ProductCategory: true,
+        ProductImages: true,
+      }
+    })
+    res.json(product);
+  } catch (err) {
+    console.log(err);
+    next(err)
   }
 };
 
 // method PUT อัพเดตสินค้า
-exports.updateProduct = async (req, res) => {
-  const { id } = req.params
-  const { name, description, price, categoryId } = req.body
+module.exports.updateProduct = async (req, res, next) => {
   try {
+    const { id } = req.params
+    const { name, description, price, categoryId } = req.body
+    const role =  req.user.role
+    if(role !== "ADMIN") {
+      return createError(403, "forbidden")
+    }
     // code
     const updatedProduct = await prisma.product.update({
       where: {
@@ -414,15 +477,19 @@ exports.updateProduct = async (req, res) => {
     })
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: "Server error" });
+    next(err)
   }
 };
 
 // method DELETE ลบสินค้า
-exports.removeProduct = async (req, res) => {
+module.exports.removeProduct = async (req, res, next) => {
   try {
     // code
     const {id} = req.params
+    const role =  req.user.role
+    if(role !== "ADMIN") {
+      return createError(403, "forbidden")
+    }
     const deletedProduct = await prisma.product.delete({
       where: {
         id: Number(id)
@@ -435,15 +502,19 @@ exports.removeProduct = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: "Server error" });
+    next(err)
   }
 };
 
 // method POST ดูสินค้าบางรายการ
-exports.listByProduct = async (req, res) => {
+module.exports.listByProduct = async (req, res, next) => {
   try {
     // code
     const { categoryId } = req.body
+    const role =  req.user.role
+    if(role !== "ADMIN") {
+      return createError(403, "forbidden")
+    }
 
     const products = await prisma.product.findMany({
       where: {
@@ -464,18 +535,22 @@ exports.listByProduct = async (req, res) => {
   });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: "Server error" });
+    next(err)
   }
 };
 
 
 // method POST ค้นหาสินค้า (!!!ยังไม่เสร็จ)
-exports.searchFiltersProduct = async (req, res) => {
+module.exports.searchFiltersProduct = async (req, res, next) => {
   try {
+    const role =  req.user.role
+    if(role !== "ADMIN") {
+      return createError(403, "forbidden")
+    }
     // code
     res.send("Hello searchFilters Product");
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: "Server error" });
+    next(err)
   }
 };
