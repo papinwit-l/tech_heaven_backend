@@ -145,7 +145,7 @@ model Product {
   updatedAt       DateTime        @updatedAt @map("updated_at")
   ProductImages   ProductImage[]
   categoryId      Int
-  stock           Int
+  stock           Int      @default(0)
   ProductCategory ProductCategory @relation(fields: [categoryId], references: [id])
   CartItems       CartItem[]
   OrderItems      OrderItem[]
