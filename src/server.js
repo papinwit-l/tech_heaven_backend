@@ -28,6 +28,7 @@ const io = new Server(server, {
 //import middleware
 const socketRoute = require("./routes/socket-route");
 const stripeRouter = require("./routes/stripe-route");
+const userRouter = require("./routes/user-route");
 const chatRouter = require("./routes/chat-route");
 
 io.on("connection", socketRoute(io));
@@ -39,6 +40,7 @@ app.use("/payment", stripeRouter);
 app.use("/auth", authRouter);
 app.use("/booking", bookingRouter);
 app.use("/cart", cartRouter);
+app.use("/user", userRouter)
 app.use("/chat", chatRouter);
 
 readdirSync("./src/routes").map((path) =>
