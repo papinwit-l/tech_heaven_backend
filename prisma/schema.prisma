@@ -225,15 +225,16 @@ enum OrderStatus {
 }
 
 model Booking {
-  id          Int           @id @default(autoincrement())
-  user        User          @relation(fields: [userId], references: [id])
-  userId      Int           @map("user_id")
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
-  bookingDate DateTime      @map("booking_date")
-  status      BookingStatus
-  type        BookingType
-  notes       String?
+  id            Int           @id @default(autoincrement())
+  user          User          @relation(fields: [userId], references: [id])
+  userId        Int           @map("user_id")
+  queuePosition Int?
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  bookingDate   DateTime      @map("booking_date")
+  status        BookingStatus
+  type          BookingType
+  notes         String?
 }
 
 enum BookingType {
