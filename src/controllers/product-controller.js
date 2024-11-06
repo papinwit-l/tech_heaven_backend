@@ -495,7 +495,8 @@ module.exports.listProducts = async (req, res, next) => {
       take: parseInt(count),
       orderBy: { createdAt : "desc"},
       include: {
-        ProductCategory: true
+        ProductCategory: true,
+        ProductImages: true,
       }
     })
     res.json(products);
@@ -517,6 +518,15 @@ module.exports.readProduct = async (req, res, next) => {
       include: {
         ProductCategory: true,
         ProductImages: true,
+        CPU: true,
+        Monitor: true,
+        CPUCooler: true,
+        PowerSupply: true,
+        Case: true,
+        GPU: true,
+        Memory: true,
+        Motherboard: true,
+        Drive: true,
       }
     })
     res.json(product);
@@ -545,6 +555,7 @@ module.exports.updateProduct = async (req, res, next) => {
         description: description,
         price: parseFloat(price),
         categoryId: parseInt(categoryId),
+        ProductImages: ProductImages
       },
     })
 
