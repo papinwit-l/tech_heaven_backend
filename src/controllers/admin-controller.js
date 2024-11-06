@@ -75,3 +75,60 @@ exports.deleteOrder = async(req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 }
+
+exports.getUser = async(req,res) => {
+    try {
+        const member = await prisma.user.findMany({
+            select : {
+                id : true,
+                email : true,
+                role : true,
+                profileImage : true,
+                dateOfBirth : true,
+                firstName : true,
+                lastName : true,
+                updatedAt : true,
+                createdAt : true,
+                isActive : true
+            }
+        })
+        res.status(200).json(member)
+    } catch (err) {
+        next(err)
+        console.log(err)
+    }
+}
+
+exports.updateUser = async(req,res) => {
+    try {
+        const {userId} = req.params
+        const {role,isActive} = req.body
+        const user = await prisma.user.update({
+            where : {
+                id : +userId
+            },
+            data : {
+                isActive : isActive,
+                role : role
+            }
+        })
+        res.status(200).json(user)
+    } catch (err) {
+    
+        console.log(err)
+    }
+}
+
+exports.deleteUser = async(req,res) => {
+    const {userId} = req.params
+    try {
+    const member = await prisma.user.delete({
+        where : {
+            id : +userId    
+        }
+        })    
+    } catch (err) {
+        console.log(err)
+    }
+    res.status(200).json("Delete Successfully")
+}

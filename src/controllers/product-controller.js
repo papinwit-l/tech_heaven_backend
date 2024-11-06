@@ -52,6 +52,7 @@ module.exports.createProductCPU = async (req, res, next) => {
         price: parseFloat(price),
         stock: +stock,
         categoryId: +categoryId,
+        stock : +stock
       },
     });
 
@@ -108,6 +109,7 @@ module.exports.createProductMonitor = async (req, res, next) => {
         price: parseFloat(price),
         stock: +stock,
         categoryId: +categoryId,
+        stock : +stock
       },
     });
 
@@ -161,6 +163,7 @@ module.exports.createProductCPUCooler = async (req, res, next) => {
         price: parseFloat(price),
         stock: +stock,
         categoryId: +categoryId,
+        stock : +stock
       },
     });
 
@@ -213,6 +216,7 @@ module.exports.createProductPowerSupply = async (req, res, next) => {
         price: parseFloat(price),
         stock: +stock,
         categoryId: +categoryId,
+        stock : +stock
       },
     });
 
@@ -263,6 +267,7 @@ module.exports.createProductCase = async (req, res, next) => {
         price: parseFloat(price),
         stock: +stock,
         categoryId: +categoryId,
+        stock : +stock
       },
     });
 
@@ -313,6 +318,7 @@ module.exports.createProductGPU = async (req, res, next) => {
         price: parseFloat(price),
         stock: +stock,
         categoryId: +categoryId,
+        stock : +stock
       },
     });
 
@@ -363,6 +369,7 @@ module.exports.createProductMemory = async (req, res, next) => {
         price: parseFloat(price),
         stock: +stock,
         categoryId: +categoryId,
+        stock : +stock
       },
     });
 
@@ -415,6 +422,7 @@ module.exports.createProductMotherboard = async (req, res, next) => {
         price: parseFloat(price),
         stock: +stock,
         categoryId: +categoryId,
+        stock : +stock
       },
     });
 
@@ -466,6 +474,7 @@ module.exports.createProductDrive = async (req, res, next) => {
         price: parseFloat(price),
         stock: +stock,
         categoryId: +categoryId,
+        stock : +stock
       },
     });
 
@@ -557,7 +566,7 @@ module.exports.readProduct = async (req, res, next) => {
 module.exports.updateProduct = async (req, res, next) => {
   try {
     const { id } = req.params
-    const { name, description, price, categoryId } = req.body
+    const { name, stock,description, price, categoryId } = req.body
     const role =  req.user.role
     if(role !== "ADMIN") {
       return createError(403, "forbidden")
@@ -572,6 +581,7 @@ module.exports.updateProduct = async (req, res, next) => {
         description: description,
         price: parseFloat(price),
         categoryId: parseInt(categoryId),
+        stock : +stock,
         ProductImages: ProductImages
       },
     })
