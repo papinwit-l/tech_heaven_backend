@@ -251,12 +251,13 @@ module.exports.resetPassword = async (req, res, next) => {
 };
 module.exports.updateUser = async (req, res, next) => {
   const userId = req.user.id;
+  console.log(req.user,"11111")
   const { firstName, lastName, email, password } = req.body;
 
   console.log("Received update request from auth-cont:", req.body);
 
   // 1. Check user exists in the database
-  const user = await prisma.user.findUnique({ where: { id: userId } });
+  const user = await prisma.user.findUnique({ where: { id: +userId } });
   if (!user) {
     return createError(404, "User not found");
   }
@@ -266,6 +267,7 @@ module.exports.updateUser = async (req, res, next) => {
     firstName,
     lastName,
     email,
+    
   };
 
   // 3. Check if a new password is provided
@@ -323,14 +325,14 @@ module.exports.updateUser = async (req, res, next) => {
   }
 
   // 5. Update the user in the database
-  await prisma.user.update({
+  const result = await prisma.user.update({
     where: { id: userId },
     data: updatedData,
   });
-
+  delete result.password
   return res.json({
     message: "User updated successfully",
-    user: updatedData,
+    user: result,
   });
 };
 
