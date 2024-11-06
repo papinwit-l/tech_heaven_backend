@@ -44,6 +44,13 @@ module.exports.identify = (socket, io) => async (data) => {
           chatId: newChat.id,
         },
       });
+      const newNotify = await prisma.chatNotification.create({
+        data: {
+          chatId: newChat.id,
+          isRead: true,
+          isAdminRead: true,
+        },
+      });
       socket.join(newChat.id);
       socket.emit("receive-identify", {
         chatId: newChat.id,
@@ -263,6 +270,23 @@ const chatNotify = async (io, chatId, message, senderRole) => {
         chatId: chatId,
       },
     });
+    const chatMember = await prisma.chatMember.findFirst({
+      where: {
+        chatId: chatId,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            profileImage: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+    });
     // ==== if not exist create new notify ====
     if (!notify) {
       //if sender role is admin isAdminRead is true but if sender role is user isRead is true
@@ -297,6 +321,7 @@ const chatNotify = async (io, chatId, message, senderRole) => {
       io.to(chatId).emit("chatNotify", {
         notify: newNotify,
         chatId: chatId,
+        chat: chatMember,
       });
       return;
     }
@@ -335,6 +360,7 @@ const chatNotify = async (io, chatId, message, senderRole) => {
     io.to(chatId).emit("chatNotify", {
       notify: updateNotify,
       chatId: chatId,
+      chat: chatMember,
     });
   } catch (error) {
     console.log(error);
@@ -343,7 +369,7 @@ const chatNotify = async (io, chatId, message, senderRole) => {
 };
 
 module.exports.updateChatNotify = (socket, io) => async (data) => {
-  console.log("call updateChatNotify");
+  // console.log("call updateChatNotify");
   const userId = data.userId;
   const chatId = data.chatId;
   if (!userId) {
@@ -368,6 +394,7 @@ module.exports.updateChatNotify = (socket, io) => async (data) => {
       chatId: chatId,
     },
   });
+
   if (user.role === "ADMIN") {
     const updateNotify = await prisma.chatNotification.update({
       where: {

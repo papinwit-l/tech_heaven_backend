@@ -27,14 +27,29 @@ module.exports.getAllChats = async (req, res, next) => {
             role: true,
           },
         },
+        chat: {
+          select: {
+            Messages: {
+              orderBy: {
+                createdAt: "desc",
+              },
+              take: 1,
+            },
+          },
+        },
       },
     });
-    const chatList = chatMembers.filter(
+    const chatListFilter = chatMembers.filter(
       (chatMember) => chatMember.user.role === "USER"
+    );
+
+    //sort chatListFilter by last message
+    const chatList = chatListFilter.sort(
+      (a, b) => b.chat.Messages[0]?.createdAt - a.chat.Messages[0]?.createdAt
     );
     res.json(chatList);
   } catch (error) {
-    console.log;
+    console.log(error);
     next(error);
   }
 };
