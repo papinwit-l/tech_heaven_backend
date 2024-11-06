@@ -3,7 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
 const cartRouter = require("./routes/cart-routes");
-
+const categoryRoute = require("./routes/category-route")
 const bookingRouter = require("./routes/booking-route");
 const authRouter = require("./routes/auth-routes");
 const errHandler = require("./middlewares/error");
@@ -43,7 +43,7 @@ app.use("/booking", bookingRouter);
 app.use("/cart", cartRouter);
 app.use("/user", userRouter)
 app.use("/chat", chatRouter);
-
+app.use("/category",categoryRoute)
 readdirSync("./src/routes").map((path) =>
   app.use("/", require(`./routes/${path}`))
 );

@@ -3,6 +3,14 @@ const createError = require("../utils/createError");
 const cloudinary = require('cloudinary').v2;
 
 
+// Configuration
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+  api_key: process.env.CLOUDINARY_API_KEY, 
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+})
+
+
 const createImage = async(images, productId, next) => {
   try {
     const imageData = images.map((image) => ({
@@ -28,7 +36,7 @@ module.exports.createProductCPU = async (req, res, next) => {
   
   try {
     // console.log(req.body)
-    const {name, description, price, categoryId, model, socket, cores, threads, baseClock, boostClock} = req.body.form;
+    const {name, description, price, categoryId, model, socket, cores, threads, baseClock, boostClock, stock} = req.body.form;
     const images = req.body?.image.images
     // console.log("------------------------------------------------")
     // console.log("CPU", images )
@@ -42,6 +50,7 @@ module.exports.createProductCPU = async (req, res, next) => {
         name: name,
         description: description,
         price: parseFloat(price),
+        stock: +stock,
         categoryId: +categoryId,
         stock : +stock
       },
@@ -84,7 +93,7 @@ module.exports.createProductCPU = async (req, res, next) => {
 module.exports.createProductMonitor = async (req, res, next) => {
   
   try {
-    const {name, description, price, categoryId, model, size, resolution, refreshRate, panelType} = req.body.form;
+    const {name, description, price, categoryId, model, size, resolution, refreshRate, panelType, stock} = req.body.form;
     const images = req.body?.image.images
     // console.log("------------------------------------------------")
     // console.log("Monitor", images )
@@ -98,6 +107,7 @@ module.exports.createProductMonitor = async (req, res, next) => {
         name: name,
         description: description,
         price: parseFloat(price),
+        stock: +stock,
         categoryId: +categoryId,
         stock : +stock
       },
@@ -137,7 +147,7 @@ module.exports.createProductMonitor = async (req, res, next) => {
 module.exports.createProductCPUCooler = async (req, res, next) => {
   
   try {
-    const {name, description, price, categoryId, model, socket, radiator, type} = req.body.form;
+    const {name, description, price, categoryId, model, socket, radiator, type, stock} = req.body.form;
     const images = req.body?.image.images
     // console.log("------------------------------------------------")
     // console.log("CPUCooler", images)
@@ -151,6 +161,7 @@ module.exports.createProductCPUCooler = async (req, res, next) => {
         name: name,
         description: description,
         price: parseFloat(price),
+        stock: +stock,
         categoryId: +categoryId,
         stock : +stock
       },
@@ -189,7 +200,7 @@ module.exports.createProductCPUCooler = async (req, res, next) => {
 module.exports.createProductPowerSupply = async (req, res, next) => {
   
   try {
-    const {name, description, price, categoryId, model, wattage} = req.body.form;
+    const {name, description, price, categoryId, model, wattage, stock} = req.body.form;
     const images = req.body?.image.images
     // console.log("------------------------------------------------")
     // console.log("PowerSupply", images )
@@ -203,6 +214,7 @@ module.exports.createProductPowerSupply = async (req, res, next) => {
         name: name,
         description: description,
         price: parseFloat(price),
+        stock: +stock,
         categoryId: +categoryId,
         stock : +stock
       },
@@ -239,7 +251,7 @@ module.exports.createProductPowerSupply = async (req, res, next) => {
 module.exports.createProductCase = async (req, res, next) => {
   
   try {
-    const {name, description, price, categoryId, model, size} = req.body.form;
+    const {name, description, price, categoryId, model, size, stock} = req.body.form;
     const images = req.body?.image.images
     // console.log("------------------------------------------------")
     // console.log("Case", images )
@@ -253,6 +265,7 @@ module.exports.createProductCase = async (req, res, next) => {
         name: name,
         description: description,
         price: parseFloat(price),
+        stock: +stock,
         categoryId: +categoryId,
         stock : +stock
       },
@@ -289,7 +302,7 @@ module.exports.createProductCase = async (req, res, next) => {
 module.exports.createProductGPU = async (req, res, next) => {
   
   try {
-    const {name, description, price, categoryId, model, vram, power} = req.body.form;
+    const {name, description, price, categoryId, model, vram, power, stock} = req.body.form;
     const images = req.body?.image.images   
     // console.log("------------------------------------------------")
     // console.log("GPU", images )
@@ -303,6 +316,7 @@ module.exports.createProductGPU = async (req, res, next) => {
         name: name,
         description: description,
         price: parseFloat(price),
+        stock: +stock,
         categoryId: +categoryId,
         stock : +stock
       },
@@ -339,7 +353,7 @@ module.exports.createProductGPU = async (req, res, next) => {
 module.exports.createProductMemory = async (req, res, next) => {
   
   try {
-    const {name, description, price, categoryId, model, memory, busSpeed, type} = req.body.form;
+    const {name, description, price, categoryId, model, memory, busSpeed, type, stock} = req.body.form;
     const images = req.body?.image.images
     // console.log("------------------------------------------------")
     // console.log("Memory", images )
@@ -353,6 +367,7 @@ module.exports.createProductMemory = async (req, res, next) => {
         name: name,
         description: description,
         price: parseFloat(price),
+        stock: +stock,
         categoryId: +categoryId,
         stock : +stock
       },
@@ -391,7 +406,7 @@ module.exports.createProductMemory = async (req, res, next) => {
 module.exports.createProductMotherboard = async (req, res, next) => {
   
   try {
-    const {name, description, price, categoryId, model, socket, chipset} = req.body.form;
+    const {name, description, price, categoryId, model, socket, chipset, stock} = req.body.form;
     const images = req.body?.image.images
     // console.log("------------------------------------------------")
     // console.log("Motherboard", images )
@@ -405,6 +420,7 @@ module.exports.createProductMotherboard = async (req, res, next) => {
         name: name,
         description: description,
         price: parseFloat(price),
+        stock: +stock,
         categoryId: +categoryId,
         stock : +stock
       },
@@ -442,7 +458,7 @@ module.exports.createProductMotherboard = async (req, res, next) => {
 module.exports.createProductDrive = async (req, res, next) => {
   
   try {
-    const {name, description, price, categoryId, model, size, type, speed, format} = req.body.form;
+    const {name, description, price, categoryId, model, size, type, speed, format, stock} = req.body.form;
     const images = req.body?.image.images
     // console.log("------------------------------------------------")
     // console.log("Drive", images )
@@ -456,6 +472,7 @@ module.exports.createProductDrive = async (req, res, next) => {
         name: name,
         description: description,
         price: parseFloat(price),
+        stock: +stock,
         categoryId: +categoryId,
         stock : +stock
       },
@@ -495,7 +512,7 @@ module.exports.createProductDrive = async (req, res, next) => {
 // ---------------------------------------------//
 
 
-// method GET ดูสินค้าระบุจำนวน
+// method GET ดูสินค้าทั้งหมด
 module.exports.listProducts = async (req, res, next) => {
   try {
     // code
@@ -515,7 +532,7 @@ module.exports.listProducts = async (req, res, next) => {
   }
 };
 
-// method GET ดูสินค้ารวม
+// method GET ดูสินค้าตาม id
 module.exports.readProduct = async (req, res, next) => {
   try {
     // code
@@ -588,6 +605,40 @@ module.exports.removeProduct = async (req, res, next) => {
     if(role !== "ADMIN") {
       return createError(403, "forbidden")
     }
+    // step 1 ค้นหาสินค้า include images
+
+    const product = await prisma.product.findFirst({
+      where: {
+        id: Number(id)
+      },
+      include: {
+        ProductImages: true
+      }
+    })
+    if(!product) {
+      return res.status(400).json({ message: 'Product not found!!!'})
+    }
+    // console.log('-------------------------------------------------------')
+    // console.log(product)
+
+    // step 2 Promise ลบแบบ รอ!
+    const deletedImage = product.ProductImages
+    .map((image) => 
+    new Promise((resolve, reject) => {
+      // ลบจาก cloud
+      cloudinary.uploader.destroy(image.public_id, (error, result) => {
+        if(error) {
+          reject(error)
+        } else {
+          resolve(result)
+        }
+      })
+    })
+    )
+    await Promise.all(deletedImage)
+
+    // step 3 ลบสินค้า
+    console.log(product,"product")
     const deletedProduct = await prisma.product.delete({
       where: {
         id: Number(id)
@@ -603,6 +654,7 @@ module.exports.removeProduct = async (req, res, next) => {
     next(err)
   }
 };
+
 
 // method POST ดูสินค้าบางรายการ
 module.exports.listByProduct = async (req, res, next) => {
@@ -656,12 +708,6 @@ module.exports.searchFiltersProduct = async (req, res, next) => {
 
 // ---------------------------------------------//
 
-// Configuration
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
-  api_key: process.env.CLOUDINARY_API_KEY, 
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-})
 
 module.exports.createImages = async(req, res, next) => {
   try {
