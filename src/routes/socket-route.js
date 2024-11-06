@@ -9,7 +9,7 @@ const socketRoute = (io) => (socket) => {
   socket.on("identify", socketControler.identify(socket, io));
   socket.on("disconnect", socketControler.disconnect(socket));
   socket.on("send_message", socketControler.sendMessage(socket, io));
-  socket.on("new_chat", socketControler.newChat(socket, io));
-  socket.on("join_chat", socketControler.joinChat(socket, io));
+  socket.on("user-send-message", socketControler.userSendMessage(socket, io));
+  socket.on("admin-send-message", socketControler.adminSendMessage(socket, io));
 };
 module.exports = socketRoute;

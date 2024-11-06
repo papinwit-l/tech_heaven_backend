@@ -60,3 +60,18 @@ exports.changeOrderStatus = async(req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 }
+
+exports.deleteOrder = async(req, res) => {
+    try {
+        const { orderId } = req.params;
+        const order = await prisma.order.delete({
+            where: {
+                id: orderId
+            }
+        });
+        res.json({ message: "Order deleted successfully" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error" });
+    }
+}

@@ -22,21 +22,27 @@ const io = new Server(server, {
     origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
   },
+  transports: ["websocket", "polling"],
 });
 
 //import middleware
 const socketRoute = require("./routes/socket-route");
 const stripeRouter = require("./routes/stripe-route");
+const userRouter = require("./routes/user-route");
+const chatRouter = require("./routes/chat-route");
 
 io.on("connection", socketRoute(io));
 
 app.use(morgan("dev"));
 app.use(cors());
+// limit file  20 mb !!!
 app.use(express.json({ limit:'20mb' }));
 app.use('/payment', stripeRouter)
 app.use("/auth", authRouter);
 app.use("/booking", bookingRouter);
 app.use("/cart", cartRouter);
+app.use("/user", userRouter)
+app.use("/chat", chatRouter);
 
 readdirSync("./src/routes").map((path) =>
   app.use("/", require(`./routes/${path}`))
