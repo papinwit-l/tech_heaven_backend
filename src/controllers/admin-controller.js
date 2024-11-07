@@ -27,7 +27,8 @@ exports.getOrderAdmin = async(req, res) => {
 
 exports.changeOrderStatus = async(req, res) => {
     try {
-        const { orderId, status } = req.body;
+        const { status } = req.body;
+        const { orderId } = req.params;
 
         const validStatuses = ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED", "RETURNED", "EXCHANGED", "COMPLETED"];
         if (!validStatuses.includes(status)) {
@@ -37,7 +38,7 @@ exports.changeOrderStatus = async(req, res) => {
         // ตรวจสอบว่ามี orderId นี้ในระบบหรือไม่
         const order = await prisma.order.findUnique({
             where: {
-                id: orderId
+                id: Number(orderId)
             }
         });
         
@@ -47,7 +48,7 @@ exports.changeOrderStatus = async(req, res) => {
 
         const orderUpdate = await prisma.order.update({
             where: {
-                id: orderId
+                id: Number(orderId)
             },
             data: {
                 status

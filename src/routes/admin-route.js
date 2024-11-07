@@ -6,7 +6,7 @@ const { getOrderAdmin, changeOrderStatus, deleteOrder } = require('../controller
 
 
 router.get("/admin/orders", getOrderAdmin)
-router.patch("/admin/order-status", changeOrderStatus)
+router.patch("/admin/order-status/:orderId", changeOrderStatus)
 router.delete("/admin/delete-order/:orderId", deleteOrder)
 
 

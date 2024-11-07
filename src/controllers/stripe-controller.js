@@ -6,7 +6,7 @@ const stripe = require("stripe")(
 
 exports.createPayment = tryCatch(async (req, res) => {
   const paymentIntent = await stripe.paymentIntents.create({
-    amount: 5000,
+    amount: 5000.00,
     currency: "thb",
     automatic_payment_methods: {
       enabled: true,

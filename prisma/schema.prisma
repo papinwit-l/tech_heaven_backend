@@ -97,12 +97,12 @@ model Chat {
 }
 
 model Message {
-  id      Int    @id @default(autoincrement())
-  chat    Chat   @relation(fields: [chatId], references: [id])
-  chatId  Int    @map("chat_id")
-  user    User   @relation(fields: [userId], references: [id])
-  userId  Int    @map("user_id")
-  message String
+  id        Int      @id @default(autoincrement())
+  chat      Chat     @relation(fields: [chatId], references: [id])
+  chatId    Int      @map("chat_id")
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int      @map("user_id")
+  message   String
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 }
@@ -189,6 +189,9 @@ model Order {
   updatedAt     DateTime      @updatedAt @map("updated_at")
   status        OrderStatus   @default(PENDING)
   paymentMethod PaymentMethod @map("payment_method")
+  paymentId     String?
+  amount        String?
+  currency      String?
   OrderItems    OrderItem[]
 }
 
