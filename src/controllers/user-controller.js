@@ -2,86 +2,134 @@ const prisma = require("../config/prisma");
 const createError = require("../utils/createError");
 const tryCatch = require("../utils/try-catch");
 
+const { Decimal } = require("@prisma/client");
+
 exports.createOrder = tryCatch(async (req, res) => {
-    const { paymentMethod } = req.body;
+  // const { paymentMethod, status } = req.body;
+  const { id, amount, currency, status, payment_method_types } =
+    req.body.paymentIntent;
+  console.log({ id, amount, currency });
 
-    if (!req.user || !req.user.id) {
-        return res.status(401).send("User not authenticated");
-    }
+  if (!req.user || !req.user.id) {
+    console.log("User not authenticated:", req.user);
+    return res.status(401).send("User not authenticated");
+  }
+  const userId = +req.user.id;
+  let cart = await prisma.cart.findFirst({
+    where: {
+      userId: userId,
+    },
+    include: {
+      CartItems: true,
+    },
+  });
 
-    const userId = +req.user.id;
+  const amountTHB = amount / 100;
+  console.log("cart", cart);
 
-    const cart = await prisma.cart.findFirst({
-        where: {
-            userId: userId,
-            status: "PENDING",
-        },
-    });
-    if (!cart) return res.status(400).send("Cart not found");
+  // console.log("Cart Items:", cartItems);
 
-    const cartItems = await prisma.cartItem.findMany({
-        where: {
-            cartId: cart.id,
-        },
-        include: {
-            product: true,
-        },
-    });
-    console.log("Cart Items:", cartItems);
+  //   if (cartItems.length === 0) return res.status(400).send("Cart is empty");
 
-    if (cartItems.length === 0) return res.status(400).send("Cart is empty");
+  const createOrder = await prisma.order.create({
+    data: {
+      OrderItems: {
+        create: cart.CartItems.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+        })),
+      },
+      userId: userId,
+      status: status,
+      paymentMethod: payment_method_types[0],
+      paymentId: id,
+      amount: amountTHB.toString(),
+      currency: currency,
+    },
+  });
 
-    console.log("Cart ID:", cart.id);
-    console.log("Cart Items IDs:", cartItems.map(item => item.id));
+  await prisma.cart.deleteMany({
+    where: {
+      userId: userId,
+    },
+  });
 
-    // Validate payment method
-    const validPaymentMethods = Object.values(PaymentMethod);
-    if (!validPaymentMethods.includes(paymentMethod)) {
-        return res.status(400).send("Invalid payment method");
-    }
+  // if (!cart) {
+  //     const total = new Decimal(0);
+  //     cart = await prisma.cart.create({
+  //         data: {
+  //             userId,
+  //             status: "PENDING",
+  //             total,
+  //         },
+  //     });
+  //     console.log("New cart created:", cart);
+  // } else {
+  //     console.log("Existing cart found:", cart);
+  // }
 
-    try {
-        const order = await prisma.order.create({
-            data: {
-                userId: userId,
-                status: "PROCESSING",
-                paymentMethod: paymentMethod,
-            },
-        });
+  // const cartItems = await prisma.cartItem.findMany({
+  //     where: { cartId: cart.id },
+  //     include: { product: true },
+  // });
 
-        for (const item of cartItems) {
-            await prisma.orderItem.create({
-                data: {
-                    orderId: order.id,
-                    productId: item.productId,
-                    quantity: item.quantity,
-                },
-            });
-        }
+  //   const totalPrice = cartItems.reduce(
+  //     (total, item) => total + item.product.price * item.quantity,
+  //     0
+  //   );
 
-        await prisma.cart.update({
-            where: {
-                id: cart.id,
-            },
-            data: {
-                status: "SUCCESS",
-            },
-        });
+  //   const transaction = await prisma.$transaction(async (prisma) => {
+  //     try {
+  //       const order = await prisma.order.create({
+  //         data: {
+  //           userId: userId,
+  //           status: status || "PENDING",
+  //           paymentMethod: paymentMethod || "PAYPAL",
+  //           paymentId: id,
+  //           amount: amount.toString(),
+  //           currency: currency,
+  //         },
+  //       });
 
-        await prisma.cartItem.deleteMany({
-            where: {
-                cartId: cart.id,
-            },
-        });
+  //       const orderItems = cartItems.map((item) => ({
+  //         orderId: order.id,
+  //         productId: item.productId,
+  //         quantity: item.quantity,
+  //       }));
 
-        res.send(order); // Return the created order
-    } catch (error) {
-        console.error("Error creating order:", error);
-        res.status(500).send("Internal server error");
-    }
+  //       await prisma.orderItem.createMany({
+  //         data: orderItems,
+  //       });
+
+  //       await prisma.cart.update({
+  //         where: { id: cart.id },
+  //         data: {
+  //           status: "SUCCESS",
+  //           total: new Decimal(totalPrice),
+  //         },
+  //       });
+
+  //       await prisma.cartItem.deleteMany({
+  //         where: { cartId: cart.id },
+  //       });
+
+  //       await prisma.cart.delete({
+  //         where: { id: cart.id },
+  //       });
+
+  //       res.send(order);
+  //     } catch (error) {
+  //       console.error("Error during order creation transaction:", error);
+  //       throw new Error("Transaction failed");
+  //     }
+  //   });
+
+  res.status(200).json({
+    success: true,
+    message: "Order created successfully",
+  });
+  //   res.send("Create order successfully");
 });
-
-  
 
 exports.getOrderByUserId = tryCatch(async (req, res) => {
   const userId = req.user.id;

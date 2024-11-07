@@ -6,7 +6,7 @@ const { getOrderAdmin, changeOrderStatus, deleteOrder,getUser, updateUser, delet
 
 
 router.get("/admin/orders", getOrderAdmin)
-router.patch("/admin/order-status", changeOrderStatus)
+router.patch("/admin/order-status/:orderId", changeOrderStatus)
 router.delete("/admin/delete-order/:orderId", deleteOrder)
 router.get("/admin/getUser",authenticate.auth,getUser)
 router.put("/admin/user/:userId",authenticate.auth,updateUser)

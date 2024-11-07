@@ -450,6 +450,7 @@ async function seedProducts() {
         ProductImages: {
           create: product.images,
         },
+        stock: product.stock
       },
     });
     console.log(`Created product: ${createdProduct.name}`);
