@@ -95,7 +95,6 @@ exports.getUser = async(req,res) => {
         })
         res.status(200).json(member)
     } catch (err) {
-        next(err)
         console.log(err)
     }
 }
