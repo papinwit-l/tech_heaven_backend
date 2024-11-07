@@ -3,9 +3,9 @@ const router = express.Router()
 const Authenticate = require("../middlewares/authenticate")
 
 // Controllers
-const { createProductCPU, listProducts, updateProduct, removeProduct, listByProduct, searchFiltersProduct, createProductMonitor, createProductCPUCooler, createProductPowerSupply, createProductCase, createProductGPU, createProductMemory, createProductMotherboard, createProductDrive, readProduct } = require('../controllers/product-controller')
+const { createProductCPU, listProducts, updateProduct, removeProduct, listByProduct, searchFiltersProduct, createProductMonitor, createProductCPUCooler, createProductPowerSupply, createProductCase, createProductGPU, createProductMemory, createProductMotherboard, createProductDrive, readProduct, createImages, removeImage } = require('../controllers/product-controller')
 
-// @ENDPOINT http://localhost:3000/product
+// @ENDPOINT http://localhost:8000/product
 
 router.get("/products/:count", listProducts)
 router.get("/product/:id", readProduct)
@@ -13,6 +13,10 @@ router.put("/product/:id", Authenticate.auth, updateProduct)
 router.delete("/product/:id", Authenticate.auth, removeProduct)
 router.post("/productby", Authenticate.auth, listByProduct)
 router.post("/search/filters", Authenticate.auth, searchFiltersProduct)
+
+// images
+router.post("/images", Authenticate.auth, createImages)
+router.post("/removeimages", Authenticate.auth, removeImage)
 
 
 router.post("/product/cpu", Authenticate.auth, createProductCPU)
