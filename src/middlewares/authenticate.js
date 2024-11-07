@@ -5,8 +5,8 @@ const prisma = require("../config/prisma");
 module.exports.auth = async (req, res, next) => {
   try {
     const authorization = req.headers.authorization;
-    console.log(authorization);
-    console.log(req.headers);
+    // console.log(authorization);
+    // console.log(req.headers);
     if (!authorization || !authorization.startsWith("Bearer ")) {
       return createError(401, "unauthenticated");
     }
