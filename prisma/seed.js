@@ -447,6 +447,7 @@ async function seedProducts() {
         description: product.description,
         price: product.price,
         categoryId: product.categoryId,
+        stock: product.stock,
         ProductImages: {
           create: product.images,
         },
@@ -476,4 +477,3 @@ run();
 
 // Command
 // node prisma/seed.js
-

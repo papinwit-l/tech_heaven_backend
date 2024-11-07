@@ -16,7 +16,7 @@ const createImage = async(images, productId, next) => {
     const imageData = images.map((image) => ({
       productId: productId,
       imageUrl: image.url,
-      public_id: image.public_id,
+      public_id: image.public_id || `default_public_id_${Date.now()}`, 
     }))
   
     const newImages = await prisma.productImage.createMany({
