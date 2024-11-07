@@ -9,10 +9,9 @@ exports.createPayment = tryCatch(async (req, res) => {
   const cart = await prisma.cart.findFirst({
     where: {
       userId: id,
-      status: "PENDING",
     }
   })
-
+  console.log("cart in payment", cart)
   const amountTHB = cart.total * 100
 
   const paymentIntent = await stripe.paymentIntents.create({

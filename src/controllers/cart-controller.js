@@ -2,9 +2,9 @@ const prisma = require("../config/prisma");
 const createError = require("../utils/createError");
 
 module.exports.createCart = async (req, res, next) => {
-  const { item } = req.body;
-  const { id } = req.user;
-  console.log("Show Item", item);
+    console.log("Show Item", req.body);
+    const { item } = req.body;
+    const { id } = req.user;
   // console.log(req.body)
   try {
     const existCart = await prisma.cart.findFirst({
@@ -49,6 +49,7 @@ module.exports.createCart = async (req, res, next) => {
             status: "PENDING",
         }
     })
+    res.send(newCart);
     // if (existCart) {
     //   // ถ้ามี Cart ของผู้ใช้อยู่แล้ว ให้เพิ่มรายการใหม่หรือตรวจสอบรายการซ้ำ
     //   if (item && item.length > 0) {
@@ -118,6 +119,7 @@ module.exports.createCart = async (req, res, next) => {
     //   }
     // }
   } catch (err) {
+    console.log(err)
     next(err);
   }
 };

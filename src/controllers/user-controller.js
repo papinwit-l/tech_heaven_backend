@@ -6,7 +6,8 @@ const { Decimal } = require("@prisma/client");
 
 exports.createOrder = tryCatch(async (req, res) => {
   // const { paymentMethod, status } = req.body;
-  const { id, amount, currency, status, payment_method_types } = req.body.paymentIntent;
+  const { id, amount, currency, status, payment_method_types } =
+    req.body.paymentIntent;
   console.log({ id, amount, currency });
 
   if (!req.user || !req.user.id) {
@@ -19,22 +20,22 @@ exports.createOrder = tryCatch(async (req, res) => {
       userId: userId,
     },
     include: {
-      CartItems: true
+      CartItems: true,
     },
   });
 
   const amountTHB = amount / 100;
-  console.log(cart)
+  console.log("cart", cart);
 
   // console.log("Cart Items:", cartItems);
 
-//   if (cartItems.length === 0) return res.status(400).send("Cart is empty");
+  //   if (cartItems.length === 0) return res.status(400).send("Cart is empty");
 
   const createOrder = await prisma.order.create({
     data: {
       OrderItems: {
         create: cart.CartItems.map((item) => ({
-          productId: item.id,
+          productId: item.productId,
           quantity: item.quantity,
         })),
       },
@@ -44,6 +45,12 @@ exports.createOrder = tryCatch(async (req, res) => {
       paymentId: id,
       amount: amountTHB.toString(),
       currency: currency,
+    },
+  });
+
+  await prisma.cart.deleteMany({
+    where: {
+      userId: userId,
     },
   });
 
@@ -66,62 +73,62 @@ exports.createOrder = tryCatch(async (req, res) => {
   //     include: { product: true },
   // });
 
-//   const totalPrice = cartItems.reduce(
-//     (total, item) => total + item.product.price * item.quantity,
-//     0
-//   );
+  //   const totalPrice = cartItems.reduce(
+  //     (total, item) => total + item.product.price * item.quantity,
+  //     0
+  //   );
 
-//   const transaction = await prisma.$transaction(async (prisma) => {
-//     try {
-//       const order = await prisma.order.create({
-//         data: {
-//           userId: userId,
-//           status: status || "PENDING",
-//           paymentMethod: paymentMethod || "PAYPAL",
-//           paymentId: id,
-//           amount: amount.toString(),
-//           currency: currency,
-//         },
-//       });
+  //   const transaction = await prisma.$transaction(async (prisma) => {
+  //     try {
+  //       const order = await prisma.order.create({
+  //         data: {
+  //           userId: userId,
+  //           status: status || "PENDING",
+  //           paymentMethod: paymentMethod || "PAYPAL",
+  //           paymentId: id,
+  //           amount: amount.toString(),
+  //           currency: currency,
+  //         },
+  //       });
 
-//       const orderItems = cartItems.map((item) => ({
-//         orderId: order.id,
-//         productId: item.productId,
-//         quantity: item.quantity,
-//       }));
+  //       const orderItems = cartItems.map((item) => ({
+  //         orderId: order.id,
+  //         productId: item.productId,
+  //         quantity: item.quantity,
+  //       }));
 
-//       await prisma.orderItem.createMany({
-//         data: orderItems,
-//       });
+  //       await prisma.orderItem.createMany({
+  //         data: orderItems,
+  //       });
 
-//       await prisma.cart.update({
-//         where: { id: cart.id },
-//         data: {
-//           status: "SUCCESS",
-//           total: new Decimal(totalPrice),
-//         },
-//       });
+  //       await prisma.cart.update({
+  //         where: { id: cart.id },
+  //         data: {
+  //           status: "SUCCESS",
+  //           total: new Decimal(totalPrice),
+  //         },
+  //       });
 
-//       await prisma.cartItem.deleteMany({
-//         where: { cartId: cart.id },
-//       });
+  //       await prisma.cartItem.deleteMany({
+  //         where: { cartId: cart.id },
+  //       });
 
-//       await prisma.cart.delete({
-//         where: { id: cart.id },
-//       });
+  //       await prisma.cart.delete({
+  //         where: { id: cart.id },
+  //       });
 
-//       res.send(order);
-//     } catch (error) {
-//       console.error("Error during order creation transaction:", error);
-//       throw new Error("Transaction failed");
-//     }
-//   });
+  //       res.send(order);
+  //     } catch (error) {
+  //       console.error("Error during order creation transaction:", error);
+  //       throw new Error("Transaction failed");
+  //     }
+  //   });
 
-//   return res.status(200).json({
-//     success: true,
-//     message: "Order created successfully",
-//     order: transaction.order,
-//   });
+  res.status(200).json({
+    success: true,
+    message: "Order created successfully",
+  });
+  //   res.send("Create order successfully");
 });
 
 exports.getOrderByUserId = tryCatch(async (req, res) => {
