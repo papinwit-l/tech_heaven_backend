@@ -16,5 +16,10 @@ router.get(
   authenticate.auth,
   chatController.adminGetNotification
 );
+router.get(
+  "/getmoremessage/:id/:skip",
+  authenticate.auth,
+  chatController.getMoreMessage
+);
 
 module.exports = router;
