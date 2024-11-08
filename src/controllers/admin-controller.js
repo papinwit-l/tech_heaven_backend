@@ -1,6 +1,6 @@
 const prisma = require("../config/prisma")
 
-exports.getOrderAdmin = async(req, res) => {
+exports.getOrderAdmin = async(req, res, next) => {
     try {
         const orders = await prisma.order.findMany({
             include: {
@@ -20,12 +20,13 @@ exports.getOrderAdmin = async(req, res) => {
         res.send(orders)
     } catch (err) {
         console.log(err)
-        res.status(500).json({ message: "Server error"})
+        next(err)
+        // res.status(500).json({ message: "Server error"})
     }
 
 }
 
-exports.changeOrderStatus = async(req, res) => {
+exports.changeOrderStatus = async(req, res, next) => {
     try {
         const { status } = req.body;
         const { orderId } = req.params;
@@ -58,11 +59,12 @@ exports.changeOrderStatus = async(req, res) => {
         res.json({ message: "Order status updated successfully", order: orderUpdate });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: "Server error" });
+        // res.status(500).json({ message: "Server error" });
+        next(err)
     }
 }
 
-exports.deleteOrder = async(req, res) => {
+exports.deleteOrder = async(req, res, next) => {
     try {
         const { orderId } = req.params;
         const order = await prisma.order.delete({
@@ -73,11 +75,12 @@ exports.deleteOrder = async(req, res) => {
         res.json({ message: "Order deleted successfully" });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: "Server error" });
+        // res.status(500).json({ message: "Server error" });
+        next(err)
     }
 }
 
-exports.getUser = async(req,res) => {
+exports.getUser = async(req,res,next) => {
     try {
         const member = await prisma.user.findMany({
             select : {
@@ -99,7 +102,7 @@ exports.getUser = async(req,res) => {
     }
 }
 
-exports.updateUser = async(req,res) => {
+exports.updateUser = async(req,res, next) => {
     try {
         const {userId} = req.params
         const {role,isActive} = req.body
@@ -116,10 +119,11 @@ exports.updateUser = async(req,res) => {
     } catch (err) {
     
         console.log(err)
+        next(err)
     }
 }
 
-exports.deleteUser = async(req,res) => {
+exports.deleteUser = async(req,res,next) => {
     const {userId} = req.params
     try {
     const member = await prisma.user.delete({
@@ -130,5 +134,6 @@ exports.deleteUser = async(req,res) => {
     } catch (err) {
         console.log(err)
     }
-    res.status(200).json("Delete Successfully")
+    // res.status(200).json("Delete Successfully")
+    next(err)
 }

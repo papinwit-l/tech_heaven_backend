@@ -508,6 +508,57 @@ module.exports.createProductDrive = async (req, res, next) => {
   }
 };
 
+// method POST //Accessory
+module.exports.createProductAccessory = async (req, res, next) => {
+  
+  try {
+    const {name, description, price, categoryId, accessoriesType, stock} = req.body.form;
+    const images = req.body?.image.images
+    // console.log("------------------------------------------------")
+    // console.log("Accessory", images )
+    const role =  req.user.role
+    if(role !== "ADMIN") {
+      return createError(403, "forbidden")
+    }
+    // สร้าง Product
+    const product = await prisma.product.create({
+      data: {
+        name: name,
+        description: description,
+        price: parseFloat(price),
+        stock: +stock,
+        categoryId: +categoryId,
+        stock : +stock
+      },
+    });
+
+    const newImages = await createImage(images, product.id, next)
+
+    //  สร้าง Accessory
+    const accessory = await prisma.accessory.create({
+      data: {
+        name: name,
+        description: description,
+        accessoriesType: accessoriesType,
+        productId: product.id,
+      },
+    });
+
+    res.json({
+      message:
+        "ProductAccessory created successfully",
+      data: {
+        product,
+        accessory,
+        image: newImages,
+      },
+    });
+  } catch (err) {
+    console.log(err);
+    next(err)
+  }
+};
+
 
 // ---------------------------------------------//
 
@@ -553,6 +604,7 @@ module.exports.readProduct = async (req, res, next) => {
         Memory: true,
         Motherboard: true,
         Drive: true,
+        Accessory: true,
       }
     })
     res.json(product);
@@ -565,11 +617,33 @@ module.exports.readProduct = async (req, res, next) => {
 // method PUT อัพเดตสินค้า
 module.exports.updateProduct = async (req, res, next) => {
   try {
+    // console.log('req.body', req.body)
     const { id } = req.params
-    const { name, stock,description, price, categoryId } = req.body
+    const { name, stock, description, price, categoryId} = req.body.form
+    const bodyInfo = req.body.form
+    const reqImage = req.body.image
     const role =  req.user.role
+    console.log('body!!!!!!', req.body)
     if(role !== "ADMIN") {
       return createError(403, "forbidden")
+    }
+    if(reqImage) {
+      reqImage.forEach(async(item) => {
+        const findImage = await prisma.productImage.findFirst({
+          where : {
+            public_id: item.public_id,
+          }
+        })
+        if(!findImage) {
+          const newImage = await prisma.productImage.create({
+            data: {
+              public_id: item.public_id,
+              imageUrl: item.secure_url,
+              productId: +id,
+            }
+          })
+        }
+      });
     }
     // code
     const updatedProduct = await prisma.product.update({
@@ -582,9 +656,156 @@ module.exports.updateProduct = async (req, res, next) => {
         price: parseFloat(price),
         categoryId: parseInt(categoryId),
         stock : +stock,
-        ProductImages: ProductImages
+        // ProductImage: ProductImage
       },
     })
+    delete bodyInfo.description
+    delete bodyInfo.price
+    delete bodyInfo.stock
+    delete bodyInfo.categoryId
+    // console.log('categoryId', categoryId)
+    switch (String(categoryId)) {
+      case "1": // CPU
+        const CPU = await prisma.cPU.findFirst({
+          where: {
+            productId: +id
+          }
+        })
+        const updateCPU = await prisma.cPU.update({
+          where: {
+            id: CPU.id,
+          },
+          data: bodyInfo
+        })
+        // console.log("CPU")
+        break;
+      case "2": // Monitor
+      const Monitor = await prisma.monitor.findFirst({
+        where: {
+          productId: +id
+        }
+      })
+      const updateMonitor = await prisma.monitor.update({
+        where: {
+          id: Monitor.id,
+        },
+        data: bodyInfo
+      })
+        // console.log("Monitor")
+        break;
+      case "3": // CPU Cooler
+      const CPUCooler = await prisma.cPUCooler.findFirst({
+        where: {
+          productId: +id
+        }
+      })
+      const updateCPUCooler = await prisma.cPUCooler.update({
+        where: {
+          id: CPUCooler.id,
+        },
+        data: bodyInfo
+      })
+        // console.log("CPU Cooler")
+        break;
+      case "4": // Power Supply
+      const PowerSupply = await prisma.powerSupply.findFirst({
+        where: {
+          productId: +id
+        }
+      })
+      const updatePowerSupply = await prisma.powerSupply.update({
+        where: {
+          id: PowerSupply.id,
+        },
+        data: bodyInfo
+      })
+        // console.log("Power Supply")
+        break;
+      case "5": // Case
+      // console.log('bodyInfo', bodyInfo)
+      const itemCase = await prisma.case.findFirst({
+        where: {
+          productId: +id
+        }
+      })
+      const updateCase = await prisma.case.update({
+        where: {
+          id: itemCase.id,
+        },
+        data: bodyInfo
+      })
+        // console.log("Case")
+        break;
+      case "6": // GPU
+      const GPU = await prisma.gPU.findFirst({
+        where: {
+          productId: +id
+        }
+      })
+      const updateGPU = await prisma.gPU.update({
+        where: {
+          id: GPU.id,
+        },
+        data: bodyInfo
+      })
+        // console.log("GPU")
+        break;
+      case "7": // Memory
+      const Memory = await prisma.memory.findFirst({
+        where: {
+          productId: +id
+        }
+      })
+      const updateMemory = await prisma.memory.update({
+        where: {
+          id: Memory.id,
+        },
+        data: bodyInfo
+      })
+        // console.log("Memory")
+        break;
+      case "8": // Motherboard
+      const Motherboard = await prisma.motherboard.findFirst({
+        where: {
+          productId: +id
+        }
+      })
+      const updateMotherboard = await prisma.motherboard.update({
+        where: {
+          id: Motherboard.id,
+        },
+        data: bodyInfo
+      })
+        // console.log("Motherboard")
+        break;
+      case "9": // Drive
+      const Drive = await prisma.drive.findFirst({
+        where: {
+          productId: +id
+        }
+      })
+      const updateDrive = await prisma.drive.update({
+        where: {
+          id: Drive.id,
+        },
+        data: bodyInfo
+      })
+        // console.log("Drive");
+        break;
+      case "10": // Accessory
+      const Accessory = await prisma.accessory.findFirst({
+        where: {
+          productId: +id
+        }
+      })
+      const updateAccessory = await prisma.accessory.update({
+        where: {
+          id: Accessory.id,
+        },
+        data: bodyInfo
+      })
+        // console.log("Accessory");
+      }
 
     res.json({
       message: "Product updated successfully",
@@ -742,6 +963,36 @@ module.exports.removeImage = async(req, res, next) => {
     cloudinary.uploader.destroy(public_id, (result) => {
       res.send('Remove Image Success!!!')
     })
+  } catch (err) {
+    console.log(err)
+    next(err)
+  }
+}
+
+
+module.exports.deleteProductImage = async(req, res, next) => {
+  try {
+    const role =  req.user.role
+    if(role !== "ADMIN") {
+      return createError(403, "forbidden")
+    }
+    const { public_id } = req.body
+    console.log(public_id)
+    const image = await prisma.productImage.findFirst({
+      where : {
+        public_id: public_id,
+      }
+    })
+    if(image) {
+      // return createError(400,"Image not found")
+   
+    const deleteImage = await prisma.productImage.delete({
+      where: {
+        id: image.id
+      }
+    })
+     }
+    res.status(200).json({message: "Remove Image Success!!!"})
   } catch (err) {
     console.log(err)
     next(err)
