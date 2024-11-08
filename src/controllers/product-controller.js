@@ -617,13 +617,33 @@ module.exports.readProduct = async (req, res, next) => {
 // method PUT อัพเดตสินค้า
 module.exports.updateProduct = async (req, res, next) => {
   try {
-    console.log('req.body', req.body)
+    // console.log('req.body', req.body)
     const { id } = req.params
-    const { name, stock, description, price, categoryId, ProductImage } = req.body
-    const bodyInfo = req.body
+    const { name, stock, description, price, categoryId} = req.body.form
+    const bodyInfo = req.body.form
+    const reqImage = req.body.image
     const role =  req.user.role
+    console.log('body!!!!!!', req.body)
     if(role !== "ADMIN") {
       return createError(403, "forbidden")
+    }
+    if(reqImage) {
+      reqImage.forEach(async(item) => {
+        const findImage = await prisma.productImage.findFirst({
+          where : {
+            public_id: item.public_id,
+          }
+        })
+        if(!findImage) {
+          const newImage = await prisma.productImage.create({
+            data: {
+              public_id: item.public_id,
+              imageUrl: item.secure_url,
+              productId: +id,
+            }
+          })
+        }
+      });
     }
     // code
     const updatedProduct = await prisma.product.update({
@@ -636,13 +656,14 @@ module.exports.updateProduct = async (req, res, next) => {
         price: parseFloat(price),
         categoryId: parseInt(categoryId),
         stock : +stock,
-        ProductImage: ProductImage
+        // ProductImage: ProductImage
       },
     })
     delete bodyInfo.description
     delete bodyInfo.price
     delete bodyInfo.stock
-    console.log('categoryId', categoryId)
+    delete bodyInfo.categoryId
+    // console.log('categoryId', categoryId)
     switch (String(categoryId)) {
       case "1": // CPU
         const CPU = await prisma.cPU.findFirst({
@@ -962,14 +983,15 @@ module.exports.deleteProductImage = async(req, res, next) => {
         public_id: public_id,
       }
     })
-    if(!image) {
-      return createError(400,"Image not found")
-    }
+    if(image) {
+      // return createError(400,"Image not found")
+   
     const deleteImage = await prisma.productImage.delete({
       where: {
         id: image.id
       }
     })
+     }
     res.status(200).json({message: "Remove Image Success!!!"})
   } catch (err) {
     console.log(err)
