@@ -92,30 +92,46 @@ model ChatMember {
 }
 
 model Chat {
-  id          Int          @id @default(autoincrement())
-  name        String
-  ChatMembers ChatMember[]
-  Messages    Message[]
+  id               Int                @id @default(autoincrement())
+  name             String
+  ChatMembers      ChatMember[]
+  Messages         Message[]
+  ChatNotification ChatNotification[]
 }
 
 model Message {
-  id        Int      @id @default(autoincrement())
-  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  chatId    Int      @map("chat_id")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    Int      @map("user_id")
-  message   String
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id               Int                @id @default(autoincrement())
+  chat             Chat               @relation(fields: [chatId], references: [id])
+  chatId           Int                @map("chat_id")
+  user             User               @relation(fields: [userId], references: [id])
+  userId           Int                @map("user_id")
+  message          String
+  createdAt        DateTime           @default(now()) @map("created_at")
+  updatedAt        DateTime           @updatedAt @map("updated_at")
+  ChatNotification ChatNotification[]
+}
+
+model ChatNotification {
+  id          Int      @id @default(autoincrement())
+  chat        Chat     @relation(fields: [chatId], references: [id])
+  chatId      Int      @map("chat_id")
+  message     Message? @relation(fields: [messageId], references: [id])
+  messageId   Int?     @map("message_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  isRead      Boolean  @default(false) @map("is_read")
+  isAdminRead Boolean  @default(false) @map("is_admin_read")
+
+  @@map("chat_notifications")
 }
 
 model Wishlist {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId Int
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int
 }
 
