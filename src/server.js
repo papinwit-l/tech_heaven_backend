@@ -3,9 +3,10 @@ const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
 const cartRouter = require("./routes/cart-routes");
-
+const categoryRoute = require("./routes/category-route")
 const bookingRouter = require("./routes/booking-route");
 const authRouter = require("./routes/auth-routes");
+const wishListRouter = require("./routes/wishlist-route")
 const errHandler = require("./middlewares/error");
 const notFound = require("./middlewares/notFound");
 const app = express();
@@ -28,19 +29,23 @@ const io = new Server(server, {
 //import middleware
 const socketRoute = require("./routes/socket-route");
 const stripeRouter = require("./routes/stripe-route");
+const userRouter = require("./routes/user-route");
 const chatRouter = require("./routes/chat-route");
 
 io.on("connection", socketRoute(io));
 
 app.use(morgan("dev"));
 app.use(cors());
-app.use(express.json());
-app.use("/payment", stripeRouter);
+// limit file  20 mb !!!
+app.use(express.json({ limit:'20mb' }));
+app.use('/payment', stripeRouter)
 app.use("/auth", authRouter);
 app.use("/booking", bookingRouter);
 app.use("/cart", cartRouter);
+app.use("/user", userRouter)
 app.use("/chat", chatRouter);
-
+app.use("/category",categoryRoute)
+app.use("/wishlist",wishListRouter)
 readdirSync("./src/routes").map((path) =>
   app.use("/", require(`./routes/${path}`))
 );

@@ -1,11 +1,45 @@
 const prisma = require("../config/prisma");
 const createError = require("../utils/createError");
+const cloudinary = require('cloudinary').v2;
+
+
+// Configuration
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+  api_key: process.env.CLOUDINARY_API_KEY, 
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+})
+
+
+const createImage = async(images, productId, next) => {
+  try {
+    const imageData = images.map((image) => ({
+      productId: productId,
+      imageUrl: image.url,
+      public_id: image.public_id || `default_public_id_${Date.now()}`, 
+    }))
+  
+    const newImages = await prisma.productImage.createMany({
+      data: imageData, // ส่งข้อมูลรูปภาพที่เตรียมไว้
+    })
+    return newImages
+    
+  } catch (err) {
+    console.log(err)
+    next(err)
+  }
+
+}
 
 // method POST //CPU
 module.exports.createProductCPU = async (req, res, next) => {
   
   try {
-    const {name, description, price, categoryId, model, socket, cores, threads, baseClock, boostClock} = req.body;
+    // console.log(req.body)
+    const {name, description, price, categoryId, model, socket, cores, threads, baseClock, boostClock, stock} = req.body.form;
+    const images = req.body?.image.images
+    // console.log("------------------------------------------------")
+    // console.log("CPU", images )
     const role =  req.user.role
     if(role !== "ADMIN") {
       return createError(403, "forbidden")
@@ -16,9 +50,13 @@ module.exports.createProductCPU = async (req, res, next) => {
         name: name,
         description: description,
         price: parseFloat(price),
+        stock: +stock,
         categoryId: +categoryId,
+        stock : +stock
       },
     });
+
+    const newImages = await createImage(images, product.id, next)
 
     // สร้าง CPU
     const cpu = await prisma.cPU.create({
@@ -35,12 +73,14 @@ module.exports.createProductCPU = async (req, res, next) => {
       },
     });
 
+    
     res.json({
       message:
         "ProductCPU created successfully",
       data: {
         product,
         cpu,
+        image: newImages,
       },
     });
   } catch (err) {
@@ -53,7 +93,10 @@ module.exports.createProductCPU = async (req, res, next) => {
 module.exports.createProductMonitor = async (req, res, next) => {
   
   try {
-    const {name, description, price, categoryId, model, size, resolution, refreshRate, panelType} = req.body;
+    const {name, description, price, categoryId, model, size, resolution, refreshRate, panelType, stock} = req.body.form;
+    const images = req.body?.image.images
+    // console.log("------------------------------------------------")
+    // console.log("Monitor", images )
     const role =  req.user.role
     if(role !== "ADMIN") {
       return createError(403, "forbidden")
@@ -64,9 +107,13 @@ module.exports.createProductMonitor = async (req, res, next) => {
         name: name,
         description: description,
         price: parseFloat(price),
+        stock: +stock,
         categoryId: +categoryId,
+        stock : +stock
       },
     });
+
+    const newImages = await createImage(images, product.id, next)
 
     // สร้าง Monitor
     const monitor = await prisma.monitor.create({
@@ -87,6 +134,7 @@ module.exports.createProductMonitor = async (req, res, next) => {
       data: {
         product,
         monitor,
+        image: newImages
       },
     });
   } catch (err) {
@@ -99,7 +147,10 @@ module.exports.createProductMonitor = async (req, res, next) => {
 module.exports.createProductCPUCooler = async (req, res, next) => {
   
   try {
-    const {name, description, price, categoryId, model, socket, radiator, type} = req.body;
+    const {name, description, price, categoryId, model, socket, radiator, type, stock} = req.body.form;
+    const images = req.body?.image.images
+    // console.log("------------------------------------------------")
+    // console.log("CPUCooler", images)
     const role =  req.user.role
     if(role !== "ADMIN") {
       return createError(403, "forbidden")
@@ -110,9 +161,13 @@ module.exports.createProductCPUCooler = async (req, res, next) => {
         name: name,
         description: description,
         price: parseFloat(price),
+        stock: +stock,
         categoryId: +categoryId,
+        stock : +stock
       },
     });
+
+    const newImages = await createImage(images, product.id, next)
 
     // สร้าง CPUCooler
     const cpuCooler = await prisma.cPUCooler.create({
@@ -132,6 +187,7 @@ module.exports.createProductCPUCooler = async (req, res, next) => {
       data: {
         product,
         cpuCooler,
+        image: newImages,
       },
     });
   } catch (err) {
@@ -144,7 +200,10 @@ module.exports.createProductCPUCooler = async (req, res, next) => {
 module.exports.createProductPowerSupply = async (req, res, next) => {
   
   try {
-    const {name, description, price, categoryId, model, wattage} = req.body;
+    const {name, description, price, categoryId, model, wattage, stock} = req.body.form;
+    const images = req.body?.image.images
+    // console.log("------------------------------------------------")
+    // console.log("PowerSupply", images )
     const role =  req.user.role
     if(role !== "ADMIN") {
       return createError(403, "forbidden")
@@ -155,9 +214,13 @@ module.exports.createProductPowerSupply = async (req, res, next) => {
         name: name,
         description: description,
         price: parseFloat(price),
+        stock: +stock,
         categoryId: +categoryId,
+        stock : +stock
       },
     });
+
+    const newImages = await createImage(images, product.id, next)
 
     // สร้าง PowerSupply
     const powerSupply = await prisma.powerSupply.create({
@@ -175,6 +238,7 @@ module.exports.createProductPowerSupply = async (req, res, next) => {
       data: {
         product,
         powerSupply,
+        image: newImages
       },
     });
   } catch (err) {
@@ -187,7 +251,10 @@ module.exports.createProductPowerSupply = async (req, res, next) => {
 module.exports.createProductCase = async (req, res, next) => {
   
   try {
-    const {name, description, price, categoryId, model, size} = req.body;
+    const {name, description, price, categoryId, model, size, stock} = req.body.form;
+    const images = req.body?.image.images
+    // console.log("------------------------------------------------")
+    // console.log("Case", images )
     const role =  req.user.role
     if(role !== "ADMIN") {
       return createError(403, "forbidden")
@@ -198,9 +265,13 @@ module.exports.createProductCase = async (req, res, next) => {
         name: name,
         description: description,
         price: parseFloat(price),
+        stock: +stock,
         categoryId: +categoryId,
+        stock : +stock
       },
     });
+
+    const newImages = await createImage(images, product.id, next)
 
     // สร้าง Case
     const caseItem = await prisma.case.create({
@@ -218,6 +289,7 @@ module.exports.createProductCase = async (req, res, next) => {
       data: {
         product,
         caseItem,
+        image: newImages,
       },
     });
   } catch (err) {
@@ -230,7 +302,10 @@ module.exports.createProductCase = async (req, res, next) => {
 module.exports.createProductGPU = async (req, res, next) => {
   
   try {
-    const {name, description, price, categoryId, model, vram, power} = req.body;
+    const {name, description, price, categoryId, model, vram, power, stock} = req.body.form;
+    const images = req.body?.image.images   
+    // console.log("------------------------------------------------")
+    // console.log("GPU", images )
     const role =  req.user.role
     if(role !== "ADMIN") {
       return createError(403, "forbidden")
@@ -241,9 +316,13 @@ module.exports.createProductGPU = async (req, res, next) => {
         name: name,
         description: description,
         price: parseFloat(price),
+        stock: +stock,
         categoryId: +categoryId,
+        stock : +stock
       },
     });
+
+    const newImages = await createImage(images, product.id, next)
 
     // สร้าง GPU
     const gpu = await prisma.gPU.create({
@@ -262,6 +341,7 @@ module.exports.createProductGPU = async (req, res, next) => {
       data: {
         product,
         gpu,
+        image: newImages,
       },
     });
   } catch (err) {
@@ -273,7 +353,10 @@ module.exports.createProductGPU = async (req, res, next) => {
 module.exports.createProductMemory = async (req, res, next) => {
   
   try {
-    const {name, description, price, categoryId, model, memory, busSpeed, type} = req.body;
+    const {name, description, price, categoryId, model, memory, busSpeed, type, stock} = req.body.form;
+    const images = req.body?.image.images
+    // console.log("------------------------------------------------")
+    // console.log("Memory", images )
     const role =  req.user.role
     if(role !== "ADMIN") {
       return createError(403, "forbidden")
@@ -284,9 +367,13 @@ module.exports.createProductMemory = async (req, res, next) => {
         name: name,
         description: description,
         price: parseFloat(price),
+        stock: +stock,
         categoryId: +categoryId,
+        stock : +stock
       },
     });
+
+    const newImages = await createImage(images, product.id, next)
 
     // สร้าง Memory
     const itemMemory = await prisma.memory.create({
@@ -306,6 +393,7 @@ module.exports.createProductMemory = async (req, res, next) => {
       data: {
         product,
         itemMemory,
+        image: newImages,
       },
     });
   } catch (err) {
@@ -318,7 +406,10 @@ module.exports.createProductMemory = async (req, res, next) => {
 module.exports.createProductMotherboard = async (req, res, next) => {
   
   try {
-    const {name, description, price, categoryId, model, socket, chipset} = req.body;
+    const {name, description, price, categoryId, model, socket, chipset, stock} = req.body.form;
+    const images = req.body?.image.images
+    // console.log("------------------------------------------------")
+    // console.log("Motherboard", images )
     const role =  req.user.role
     if(role !== "ADMIN") {
       return createError(403, "forbidden")
@@ -329,9 +420,13 @@ module.exports.createProductMotherboard = async (req, res, next) => {
         name: name,
         description: description,
         price: parseFloat(price),
+        stock: +stock,
         categoryId: +categoryId,
+        stock : +stock
       },
     });
+
+    const newImages = await createImage(images, product.id, next)
 
     // สร้าง Motherboard
     const motherboard = await prisma.motherboard.create({
@@ -350,6 +445,7 @@ module.exports.createProductMotherboard = async (req, res, next) => {
       data: {
         product,
         motherboard,
+        image: newImages,
       },
     });
   } catch (err) {
@@ -362,7 +458,10 @@ module.exports.createProductMotherboard = async (req, res, next) => {
 module.exports.createProductDrive = async (req, res, next) => {
   
   try {
-    const {name, description, price, categoryId, model, size, type, speed, format} = req.body;
+    const {name, description, price, categoryId, model, size, type, speed, format, stock} = req.body.form;
+    const images = req.body?.image.images
+    // console.log("------------------------------------------------")
+    // console.log("Drive", images )
     const role =  req.user.role
     if(role !== "ADMIN") {
       return createError(403, "forbidden")
@@ -373,9 +472,13 @@ module.exports.createProductDrive = async (req, res, next) => {
         name: name,
         description: description,
         price: parseFloat(price),
+        stock: +stock,
         categoryId: +categoryId,
+        stock : +stock
       },
     });
+
+    const newImages = await createImage(images, product.id, next)
 
     //  สร้าง Drive
     const drive = await prisma.drive.create({
@@ -396,6 +499,7 @@ module.exports.createProductDrive = async (req, res, next) => {
       data: {
         product,
         drive,
+        image: newImages,
       },
     });
   } catch (err) {
@@ -408,7 +512,7 @@ module.exports.createProductDrive = async (req, res, next) => {
 // ---------------------------------------------//
 
 
-// method GET ดูสินค้าระบุจำนวน
+// method GET ดูสินค้าทั้งหมด
 module.exports.listProducts = async (req, res, next) => {
   try {
     // code
@@ -417,7 +521,8 @@ module.exports.listProducts = async (req, res, next) => {
       take: parseInt(count),
       orderBy: { createdAt : "desc"},
       include: {
-        ProductCategory: true
+        ProductCategory: true,
+        ProductImages: true,
       }
     })
     res.json(products);
@@ -427,7 +532,7 @@ module.exports.listProducts = async (req, res, next) => {
   }
 };
 
-// method GET ดูสินค้ารวม
+// method GET ดูสินค้าตาม id
 module.exports.readProduct = async (req, res, next) => {
   try {
     // code
@@ -439,6 +544,15 @@ module.exports.readProduct = async (req, res, next) => {
       include: {
         ProductCategory: true,
         ProductImages: true,
+        CPU: true,
+        Monitor: true,
+        CPUCooler: true,
+        PowerSupply: true,
+        Case: true,
+        GPU: true,
+        Memory: true,
+        Motherboard: true,
+        Drive: true,
       }
     })
     res.json(product);
@@ -452,7 +566,7 @@ module.exports.readProduct = async (req, res, next) => {
 module.exports.updateProduct = async (req, res, next) => {
   try {
     const { id } = req.params
-    const { name, description, price, categoryId } = req.body
+    const { name, stock,description, price, categoryId } = req.body
     const role =  req.user.role
     if(role !== "ADMIN") {
       return createError(403, "forbidden")
@@ -467,6 +581,8 @@ module.exports.updateProduct = async (req, res, next) => {
         description: description,
         price: parseFloat(price),
         categoryId: parseInt(categoryId),
+        stock : +stock,
+        ProductImages: ProductImages
       },
     })
 
@@ -489,6 +605,40 @@ module.exports.removeProduct = async (req, res, next) => {
     if(role !== "ADMIN") {
       return createError(403, "forbidden")
     }
+    // step 1 ค้นหาสินค้า include images
+
+    const product = await prisma.product.findFirst({
+      where: {
+        id: Number(id)
+      },
+      include: {
+        ProductImages: true
+      }
+    })
+    if(!product) {
+      return res.status(400).json({ message: 'Product not found!!!'})
+    }
+    // console.log('-------------------------------------------------------')
+    // console.log(product)
+
+    // step 2 Promise ลบแบบ รอ!
+    const deletedImage = product.ProductImages
+    .map((image) => 
+    new Promise((resolve, reject) => {
+      // ลบจาก cloud
+      cloudinary.uploader.destroy(image.public_id, (error, result) => {
+        if(error) {
+          reject(error)
+        } else {
+          resolve(result)
+        }
+      })
+    })
+    )
+    await Promise.all(deletedImage)
+
+    // step 3 ลบสินค้า
+    console.log(product,"product")
     const deletedProduct = await prisma.product.delete({
       where: {
         id: Number(id)
@@ -504,6 +654,7 @@ module.exports.removeProduct = async (req, res, next) => {
     next(err)
   }
 };
+
 
 // method POST ดูสินค้าบางรายการ
 module.exports.listByProduct = async (req, res, next) => {
@@ -553,3 +704,46 @@ module.exports.searchFiltersProduct = async (req, res, next) => {
     next(err)
   }
 };
+
+
+// ---------------------------------------------//
+
+
+module.exports.createImages = async(req, res, next) => {
+  try {
+    const role =  req.user.role
+    // console.log(req.body)
+    const result = await cloudinary.uploader.upload(req.body.image, {
+      public_id: `${Date.now()}`,
+      resource_type: 'auto',
+      folder:'Teach_Heaven'
+    })
+    if(role !== "ADMIN") {
+      return createError(403, "forbidden")
+    }
+
+    res.send(result)
+  } catch (err) {
+    console.log(err)
+    next(err)
+  }
+}
+
+
+
+module.exports.removeImage = async(req, res, next) => {
+  try {
+    const role =  req.user.role
+    if(role !== "ADMIN") {
+      return createError(403, "forbidden")
+    }
+    const { public_id } = req.body
+    // console.log(public_id)
+    cloudinary.uploader.destroy(public_id, (result) => {
+      res.send('Remove Image Success!!!')
+    })
+  } catch (err) {
+    console.log(err)
+    next(err)
+  }
+}

@@ -27,7 +27,8 @@ exports.getOrderAdmin = async(req, res) => {
 
 exports.changeOrderStatus = async(req, res) => {
     try {
-        const { orderId, status } = req.body;
+        const { status } = req.body;
+        const { orderId } = req.params;
 
         const validStatuses = ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED", "RETURNED", "EXCHANGED", "COMPLETED"];
         if (!validStatuses.includes(status)) {
@@ -37,7 +38,7 @@ exports.changeOrderStatus = async(req, res) => {
         // ตรวจสอบว่ามี orderId นี้ในระบบหรือไม่
         const order = await prisma.order.findUnique({
             where: {
-                id: orderId
+                id: Number(orderId)
             }
         });
         
@@ -47,7 +48,7 @@ exports.changeOrderStatus = async(req, res) => {
 
         const orderUpdate = await prisma.order.update({
             where: {
-                id: orderId
+                id: Number(orderId)
             },
             data: {
                 status
@@ -59,4 +60,75 @@ exports.changeOrderStatus = async(req, res) => {
         console.error(err);
         res.status(500).json({ message: "Server error" });
     }
+}
+
+exports.deleteOrder = async(req, res) => {
+    try {
+        const { orderId } = req.params;
+        const order = await prisma.order.delete({
+            where: {
+                id: orderId
+            }
+        });
+        res.json({ message: "Order deleted successfully" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error" });
+    }
+}
+
+exports.getUser = async(req,res) => {
+    try {
+        const member = await prisma.user.findMany({
+            select : {
+                id : true,
+                email : true,
+                role : true,
+                profileImage : true,
+                dateOfBirth : true,
+                firstName : true,
+                lastName : true,
+                updatedAt : true,
+                createdAt : true,
+                isActive : true
+            }
+        })
+        res.status(200).json(member)
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+exports.updateUser = async(req,res) => {
+    try {
+        const {userId} = req.params
+        const {role,isActive} = req.body
+        const user = await prisma.user.update({
+            where : {
+                id : +userId
+            },
+            data : {
+                isActive : isActive,
+                role : role
+            }
+        })
+        res.status(200).json(user)
+    } catch (err) {
+    
+        console.log(err)
+    }
+}
+
+exports.deleteUser = async(req,res) => {
+    const {userId} = req.params
+    try {
+    const member = await prisma.user.delete({
+        where : {
+            id : +userId    
+        }
+        })    
+    } catch (err) {
+        console.log(err)
+    }
+    res.status(200).json("Delete Successfully")
 }

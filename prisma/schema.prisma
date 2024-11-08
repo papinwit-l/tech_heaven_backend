@@ -25,6 +25,7 @@ model User {
   role          Role            @default(USER)
   createdAt     DateTime        @default(now()) @map("created_at")
   updatedAt     DateTime        @updatedAt @map("updated_at")
+  isActive      Boolean         @default(true)
   UserPromotion UserPromotion[]
   ChatMembers   ChatMember[]
   Messages      Message[]
@@ -32,6 +33,7 @@ model User {
   Order         Order[]
   Booking       Booking[]
   PCBuild       PCBuild[]
+  Wishlist      Wishlist[]
 }
 
 enum Role {
@@ -41,9 +43,9 @@ enum Role {
 
 model UserPromotion {
   id          Int       @id @default(autoincrement())
-  user        User      @relation(fields: [userId], references: [id])
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      Int       @map("user_id")
-  promotion   Promotion @relation(fields: [promotionId], references: [id])
+  promotion   Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
   promotionId Int       @map("promotion_id")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
@@ -82,9 +84,9 @@ enum PromotionType {
 
 model ChatMember {
   id        Int      @id @default(autoincrement())
-  chat      Chat     @relation(fields: [chatId], references: [id])
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
   chatId    Int      @map("chat_id")
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int      @map("user_id")
   createdAt DateTime @default(now()) @map("created_at")
 }
@@ -123,27 +125,36 @@ model ChatNotification {
   @@map("chat_notifications")
 }
 
+model Wishlist {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+}
+
 model Cart {
   id        Int        @id @default(autoincrement())
-  user      User       @relation(fields: [userId], references: [id])
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int        @map("user_id")
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")
-  status    Status
+  status    String
+  total     Decimal    @db.Decimal(10, 2)
   CartItems CartItem[]
-}
-
-enum Status {
-  PENDING
-  SUCCESS
 }
 
 model CartItem {
   id        Int     @id @default(autoincrement())
-  cart      Cart    @relation(fields: [cartId], references: [id])
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
   cartId    Int     @map("cart_id")
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int     @map("product_id")
+  quantity  Int     @default(1)
+  price     Decimal @db.Decimal(10, 2)
+  total     Decimal @db.Decimal(10, 2)
 
   @@map("cart_item")
 }
@@ -157,7 +168,8 @@ model Product {
   updatedAt       DateTime        @updatedAt @map("updated_at")
   ProductImages   ProductImage[]
   categoryId      Int
-  ProductCategory ProductCategory @relation(fields: [categoryId], references: [id])
+  stock           Int
+  ProductCategory ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   CartItems       CartItem[]
   OrderItems      OrderItem[]
   CPU             CPU[]
@@ -169,13 +181,16 @@ model Product {
   Drive           Drive[]
   CPUCooler       CPUCooler[]
   Monitor         Monitor[]
+  Accessory       Accessory[]
+  Wishlist        Wishlist[]
 }
 
 model ProductImage {
   id        Int     @id @default(autoincrement())
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int     @map("product_id")
   imageUrl  String
+  public_id String?
 
   @@map("product_image")
 }
@@ -192,58 +207,41 @@ model ProductCategory {
 }
 
 model Order {
-  id            Int           @id @default(autoincrement())
-  user          User          @relation(fields: [userId], references: [id])
-  userId        Int           @map("user_id")
-  createdAt     DateTime      @default(now()) @map("created_at")
-  updatedAt     DateTime      @updatedAt @map("updated_at")
-  status        OrderStatus
-  paymentMethod PaymentMethod @map("payment_method")
+  id            Int         @id @default(autoincrement())
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        Int         @map("user_id")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+  status        String      @default("Pending")
+  paymentMethod String?     @map("payment_method")
+  paymentId     String?
+  amount        String?
+  currency      String?
   OrderItems    OrderItem[]
 }
 
 model OrderItem {
   id        Int     @id @default(autoincrement())
-  order     Order   @relation(fields: [orderId], references: [id])
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId   Int     @map("order_id")
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int     @map("product_id")
   quantity  Int
 
   @@map("order_item")
 }
 
-enum PaymentMethod {
-  CASH_ON_DELIVERY
-  CREDIT_CARD
-  PAYPAL
-  BANK_TRANSFER
-  MOBILE_PAYMENT
-  GIFT_CARD
-}
-
-enum OrderStatus {
-  PENDING
-  PROCESSING
-  SHIPPED
-  DELIVERED
-  CANCELLED
-  REFUNDED
-  RETURNED
-  EXCHANGED
-  COMPLETED
-}
-
 model Booking {
-  id          Int           @id @default(autoincrement())
-  user        User          @relation(fields: [userId], references: [id])
-  userId      Int           @map("user_id")
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
-  bookingDate DateTime      @map("booking_date")
-  status      BookingStatus
-  type        BookingType
-  notes       String?
+  id            Int           @id @default(autoincrement())
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        Int           @map("user_id")
+  queuePosition Int?
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  bookingDate   DateTime      @map("booking_date")
+  status        BookingStatus
+  type          BookingType
+  notes         String?
 }
 
 enum BookingType {
@@ -262,28 +260,28 @@ enum BookingStatus {
 
 model PCBuild {
   id            Int          @id @default(autoincrement())
-  user          User         @relation(fields: [userId], references: [id])
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId        Int          @map("user_id")
   createdAt     DateTime     @default(now()) @map("created_at")
   updatedAt     DateTime     @updatedAt @map("updated_at")
   description   String?
-  cpu           CPU?         @relation(fields: [cpuId], references: [id])
+  cpu           CPU?         @relation(fields: [cpuId], references: [id], onDelete: Cascade)
   cpuId         Int?         @map("cpu_id")
-  motherboard   Motherboard? @relation(fields: [motherboardId], references: [id])
+  motherboard   Motherboard? @relation(fields: [motherboardId], references: [id], onDelete: Cascade)
   motherboardId Int?         @map("motherboard_id")
-  gpu           GPU?         @relation(fields: [gpuId], references: [id])
+  gpu           GPU?         @relation(fields: [gpuId], references: [id], onDelete: Cascade)
   gpuId         Int?         @map("gpu_id")
-  memory        Memory?      @relation(fields: [memoryId], references: [id])
+  memory        Memory?      @relation(fields: [memoryId], references: [id], onDelete: Cascade)
   memoryId      Int?         @map("memory_id")
-  powerSupply   PowerSupply? @relation(fields: [powerSupplyId], references: [id])
+  powerSupply   PowerSupply? @relation(fields: [powerSupplyId], references: [id], onDelete: Cascade)
   powerSupplyId Int?         @map("power_supply_id")
-  case          Case?        @relation(fields: [caseId], references: [id])
+  case          Case?        @relation(fields: [caseId], references: [id], onDelete: Cascade)
   caseId        Int?         @map("case_id")
-  drive         Drive?       @relation(fields: [driveId], references: [id])
+  drive         Drive?       @relation(fields: [driveId], references: [id], onDelete: Cascade)
   driveId       Int?         @map("drive_id")
-  cpuCooler     CPUCooler?   @relation(fields: [cpuCoolerId], references: [id])
+  cpuCooler     CPUCooler?   @relation(fields: [cpuCoolerId], references: [id], onDelete: Cascade)
   cpuCoolerId   Int?         @map("cpu_cooler_id")
-  monitor       Monitor?     @relation(fields: [monitorId], references: [id])
+  monitor       Monitor?     @relation(fields: [monitorId], references: [id], onDelete: Cascade)
   monitorId     Int?         @map("monitor_id")
   totalPrice    Float
 }
@@ -301,7 +299,7 @@ model CPU {
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
   description String
-  product     Product   @relation(fields: [productId], references: [id])
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId   Int       @map("product_id")
   PCBuild     PCBuild[]
 
@@ -316,7 +314,7 @@ model Motherboard {
   chipset   String
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
-  product   Product   @relation(fields: [productId], references: [id])
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int       @map("product_id")
   PCBuild   PCBuild[]
 }
@@ -327,7 +325,7 @@ model GPU {
   model     String
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
-  product   Product   @relation(fields: [productId], references: [id])
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int       @map("product_id")
   vram      Int
   power     Int
@@ -342,7 +340,7 @@ model Memory {
   model     String
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
-  product   Product   @relation(fields: [productId], references: [id])
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int       @map("product_id")
   memory    Int
   busSpeed  Int       @map("bus_speed")
@@ -356,7 +354,7 @@ model PowerSupply {
   model     String
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
-  product   Product   @relation(fields: [productId], references: [id])
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int       @map("product_id")
   wattage   Int
   PCBuild   PCBuild[]
@@ -370,7 +368,7 @@ model Case {
   model     String
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
-  product   Product   @relation(fields: [productId], references: [id])
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int       @map("product_id")
   size      String
   PCBuild   PCBuild[]
@@ -382,7 +380,7 @@ model Drive {
   model     String
   createdAt DateTime    @default(now()) @map("created_at")
   updatedAt DateTime    @updatedAt @map("updated_at")
-  product   Product     @relation(fields: [productId], references: [id])
+  product   Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int         @map("product_id")
   size      String
   type      DriveType
@@ -407,7 +405,7 @@ model CPUCooler {
   model     String
   createdAt DateTime      @default(now()) @map("created_at")
   updatedAt DateTime      @updatedAt @map("updated_at")
-  product   Product       @relation(fields: [productId], references: [id])
+  product   Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int           @map("product_id")
   socket    String
   radiator  Int
@@ -428,11 +426,32 @@ model Monitor {
   model       String
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
-  product     Product   @relation(fields: [productId], references: [id])
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId   Int       @map("product_id")
   size        Int
   resolution  String
   refreshRate Int       @map("refresh_rate")
   panelType   String    @map("panel_type")
   PCBuild     PCBuild[]
+}
+
+model Accessory {
+  id              Int             @id @default(autoincrement())
+  name            String
+  description     String?
+  product         Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId       Int             @map("product_id")
+  accessoriesType AccessoriesType
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+}
+
+enum AccessoriesType {
+  MOUSE
+  KEYBOARD
+  CHAIR
+  HEADPHONE
+  MICROPHONE
+  SPEAKER
+  OTHER
 }
