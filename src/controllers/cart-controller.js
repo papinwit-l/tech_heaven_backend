@@ -73,6 +73,7 @@ module.exports.createCart = async (req, res, next) => {
                 res.status(201).json({ cart: newCart });
             }
         }
+        res.send(newCart)
     } catch (err) {
         console.log(err);
         next(err);
