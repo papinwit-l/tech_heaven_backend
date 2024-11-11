@@ -26,7 +26,6 @@ model User {
   createdAt     DateTime        @default(now()) @map("created_at")
   updatedAt     DateTime        @updatedAt @map("updated_at")
   isActive      Boolean         @default(true)
-  UserPromotion UserPromotion[]
   ChatMembers   ChatMember[]
   Messages      Message[]
   Carts         Cart[]
@@ -41,45 +40,13 @@ enum Role {
   USER
 }
 
-model UserPromotion {
-  id          Int       @id @default(autoincrement())
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      Int       @map("user_id")
-  promotion   Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
-  promotionId Int       @map("promotion_id")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  redeemedAt  DateTime  @map("redeemed_at")
-
-  @@map("user_promotions")
-}
-
-model Promotion {
-  id                Int             @id @default(autoincrement())
-  title             String
-  description       String
-  imageUrl          String
-  createdAt         DateTime        @default(now()) @map("created_at")
-  updatedAt         DateTime        @updatedAt @map("updated_at")
-  promotionDiscount Float           @map("promotion_discount")
-  discountType      DiscountType    @map("discount_type")
-  startDate         DateTime        @map("start_date")
-  expirationDate    DateTime        @map("expiration_date")
-  promotionType     PromotionType   @map("promotion_type")
-  promotionCode     String          @map("promotion_code")
-  UserPromotion     UserPromotion[]
-}
-
-enum DiscountType {
-  PERCENTAGE
-  FIXED
-}
-
-enum PromotionType {
-  NEW_USER
-  RETURNING_USER
-  BIRTHDAY
-  OTHER
+model Coupon {
+  id Int @id @default(autoincrement())
+  name String 
+  expiry DateTime
+  discount Int 
+  amount Int
+  status Boolean @default(true)
 }
 
 model ChatMember {

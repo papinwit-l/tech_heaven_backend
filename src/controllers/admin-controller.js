@@ -1,6 +1,6 @@
 const prisma = require("../config/prisma")
 
-exports.getOrderAdmin = async(req, res, next) => {
+exports.getOrderAdmin = async (req, res, next) => {
     try {
         const orders = await prisma.order.findMany({
             include: {
@@ -26,7 +26,7 @@ exports.getOrderAdmin = async(req, res, next) => {
 
 }
 
-exports.changeOrderStatus = async(req, res, next) => {
+exports.changeOrderStatus = async (req, res, next) => {
     try {
         const { status } = req.body;
         const { orderId } = req.params;
@@ -42,7 +42,7 @@ exports.changeOrderStatus = async(req, res, next) => {
                 id: Number(orderId)
             }
         });
-        
+
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }
@@ -64,7 +64,7 @@ exports.changeOrderStatus = async(req, res, next) => {
     }
 }
 
-exports.deleteOrder = async(req, res, next) => {
+exports.deleteOrder = async (req, res, next) => {
     try {
         const { orderId } = req.params;
         const order = await prisma.order.delete({
@@ -80,20 +80,20 @@ exports.deleteOrder = async(req, res, next) => {
     }
 }
 
-exports.getUser = async(req,res,next) => {
+exports.getUser = async (req, res, next) => {
     try {
         const member = await prisma.user.findMany({
-            select : {
-                id : true,
-                email : true,
-                role : true,
-                profileImage : true,
-                dateOfBirth : true,
-                firstName : true,
-                lastName : true,
-                updatedAt : true,
-                createdAt : true,
-                isActive : true
+            select: {
+                id: true,
+                email: true,
+                role: true,
+                profileImage: true,
+                dateOfBirth: true,
+                firstName: true,
+                lastName: true,
+                updatedAt: true,
+                createdAt: true,
+                isActive: true
             }
         })
         res.status(200).json(member)
@@ -102,35 +102,35 @@ exports.getUser = async(req,res,next) => {
     }
 }
 
-exports.updateUser = async(req,res, next) => {
+exports.updateUser = async (req, res, next) => {
     try {
-        const {userId} = req.params
-        const {role,isActive} = req.body
+        const { userId } = req.params
+        const { role, isActive } = req.body
         const user = await prisma.user.update({
-            where : {
-                id : +userId
+            where: {
+                id: +userId
             },
-            data : {
-                isActive : isActive,
-                role : role
+            data: {
+                isActive: isActive,
+                role: role
             }
         })
         res.status(200).json(user)
     } catch (err) {
-    
+
         console.log(err)
         next(err)
     }
 }
 
-exports.deleteUser = async(req,res,next) => {
-    const {userId} = req.params
+exports.deleteUser = async (req, res, next) => {
+    const { userId } = req.params
     try {
-    const member = await prisma.user.delete({
-        where : {
-            id : +userId    
-        }
-        })    
+        const member = await prisma.user.delete({
+            where: {
+                id: +userId
+            }
+        })
     } catch (err) {
         console.log(err)
     }
@@ -139,82 +139,32 @@ exports.deleteUser = async(req,res,next) => {
 }
 
 
-module.exports.createCoupon = async(req,res,next)=> {
-    const {title, description, promotionDiscount, discountType, startDate, expirationDate, promotionCode, promotionType, imageUrl} = req.body
+module.exports.createCoupon = async (req, res, next) => {
+    const { name, expiry, discount, amount } = req.body
+    const expiryConvert = new Date(req.body.expiry)
+    console.log(req.body)
     try {
-        const haveFile = !!req.file
-        let uploadResult = {}
-        if(haveFile){
-            uploadResult = await cloudinary.uploader.upload(req.file.path,{
-                overwrite : true,
-            })
-        }
-        const promotion = await prisma.promotion.create({
+        const coupon = await prisma.coupon.create({
             data: {
-              title,
-              description,
-              promotionDiscount,
-              discountType,
-              startDate: new Date(startDate),
-              expirationDate: new Date(expirationDate),
-              promotionCode,
-              promotionType,
-              imageUrl,
+                name,
+                expiry : expiryConvert,
+                discount : +discount,
+                amount : +amount
             }
-    })
-    res.status(200).json(promotion)
+        })
+        res.status(200).json(coupon)
     } catch (err) {
         next(err)
         console.log(err)
     }
 }
 
-module.exports.editCoupon = async(req,res,next) => {
-    const { id } = req.params;
-  const { title, description, promotionDiscount, discountType, startDate, expirationDate, promotionCode, promotionType, imageUrl } = req.body;
-
-  try {
-    const promotion = await prisma.promotion.update({
-      where: { id: +id },
-      data: {
-        title,
-        description,
-        promotionDiscount,
-        discountType,
-        startDate: new Date(startDate),
-        expirationDate: new Date(expirationDate),
-        promotionCode,
-        promotionType,
-        imageUrl,
-      },
-    });
-    res.status(200).json(promotion);
-  } catch (err) {
-    console.error(err);
-    next(err)
-
-  }
-};
-
-module.exports.deleteCoupon = async(req,res,next) => {
-    const {id} = req.params
+module.exports.getCoupon = async (req,res,next) => {
     try {
-        await prisma.promotion.delete({
-          where: { id: +id },
-        });
-        res.status(200).send('Coupon deleted successfully');
-      } catch (err) {
-        console.error(err);
-       next(err)
-      }
-}
-
-module.exports.getCoupon = async(req,res,next)=>{
-    try {
-        const promotions = await prisma.promotion.findMany();
-        res.status(200).json(promotions);
-      } catch (err) {
-        console.error(err);
-       next(err)
-      }
+        const result = await prisma.coupon.findMany()
+        res.status(200).json(result)
+    } catch (err) {
+        next(err)
+        console.log(err)
+    }
 }
