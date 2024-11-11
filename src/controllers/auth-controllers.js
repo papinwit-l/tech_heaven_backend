@@ -251,7 +251,7 @@ module.exports.resetPassword = async (req, res, next) => {
 };
 module.exports.updateUser = async (req, res, next) => {
   const userId = req.user.id;
-  console.log(req.user,"11111")
+  console.log(req.user, "11111");
   const { firstName, lastName, email, password } = req.body;
 
   console.log("Received update request from auth-cont:", req.body);
@@ -267,7 +267,6 @@ module.exports.updateUser = async (req, res, next) => {
     firstName,
     lastName,
     email,
-    
   };
 
   // 3. Check if a new password is provided
@@ -323,13 +322,12 @@ module.exports.updateUser = async (req, res, next) => {
       return createError(500, "Failed to upload image");
     }
   }
-
   // 5. Update the user in the database
   const result = await prisma.user.update({
     where: { id: userId },
     data: updatedData,
   });
-  delete result.password
+  delete result.password;
   return res.json({
     message: "User updated successfully",
     user: result,
