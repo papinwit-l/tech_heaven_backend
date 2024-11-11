@@ -13,6 +13,9 @@ cloudinary.config({
 
 const createImage = async(images, productId, next) => {
   try {
+    if(!images) {
+      return
+    }
     const imageData = images.map((image) => ({
       productId: productId,
       imageUrl: image.url,
@@ -671,11 +674,19 @@ module.exports.updateProduct = async (req, res, next) => {
             productId: +id
           }
         })
+        const { cores, threads, baseClock, boostClock, ...restCPU} = bodyInfo
         const updateCPU = await prisma.cPU.update({
           where: {
             id: CPU.id,
+
           },
-          data: bodyInfo
+          data : {
+            ...restCPU,
+            cores : +cores,
+            threads: +threads,
+            baseClock: +baseClock,
+            boostClock: +boostClock,
+          }
         })
         // console.log("CPU")
         break;
@@ -685,11 +696,16 @@ module.exports.updateProduct = async (req, res, next) => {
           productId: +id
         }
       })
+      const { size, refreshRate, ...restMonitor } = bodyInfo
       const updateMonitor = await prisma.monitor.update({
         where: {
           id: Monitor.id,
         },
-        data: bodyInfo
+        data: {
+          ...restMonitor,
+          size: +size,
+          refreshRate: +refreshRate
+        }
       })
         // console.log("Monitor")
         break;
@@ -699,11 +715,16 @@ module.exports.updateProduct = async (req, res, next) => {
           productId: +id
         }
       })
+      const { radiator, ...restCPUCooler } = bodyInfo
       const updateCPUCooler = await prisma.cPUCooler.update({
         where: {
           id: CPUCooler.id,
+
         },
-        data: bodyInfo
+        data: {
+          ...restCPUCooler,
+          radiator: +radiator
+        }
       })
         // console.log("CPU Cooler")
         break;
@@ -713,11 +734,15 @@ module.exports.updateProduct = async (req, res, next) => {
           productId: +id
         }
       })
+      const { wattage, ...restPowerSupply } = bodyInfo
       const updatePowerSupply = await prisma.powerSupply.update({
         where: {
           id: PowerSupply.id,
         },
-        data: bodyInfo
+        data: {
+          ...restPowerSupply,
+          wattage: +wattage,
+        }
       })
         // console.log("Power Supply")
         break;
@@ -742,11 +767,16 @@ module.exports.updateProduct = async (req, res, next) => {
           productId: +id
         }
       })
+      const { vram, power, ...restGPU } = bodyInfo
       const updateGPU = await prisma.gPU.update({
         where: {
           id: GPU.id,
         },
-        data: bodyInfo
+        data : {
+          ...restGPU,
+          vram: +vram,
+          power: +power,
+        }
       })
         // console.log("GPU")
         break;
@@ -756,11 +786,16 @@ module.exports.updateProduct = async (req, res, next) => {
           productId: +id
         }
       })
+      const { memory, busSpeed, ...restMemory } = bodyInfo
       const updateMemory = await prisma.memory.update({
         where: {
           id: Memory.id,
         },
-        data: bodyInfo
+        data:{
+          ...restMemory,
+          memory: +memory,
+          busSpeed: +busSpeed,
+        }
       })
         // console.log("Memory")
         break;
@@ -915,7 +950,7 @@ module.exports.listByProduct = async (req, res, next) => {
 module.exports.searchFiltersProduct = async (req, res, next) => {
   try {
     const role =  req.user.role
-    if(role !== "ADMIN") {
+    if(role !== "ADMIN" && role !== "USER") {
       return createError(403, "forbidden")
     }
     // code
