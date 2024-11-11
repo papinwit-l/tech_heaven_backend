@@ -1038,3 +1038,33 @@ module.exports.deleteProductImage = async (req, res, next) => {
     next(err);
   }
 };
+
+module.exports.getProductByCategoryId = async (req, res, next) => {
+  try {
+    const categoryId = +req.params.categoryId;
+    const products = await prisma.product.findMany({
+      where: {
+        categoryId: categoryId,
+      },
+      include: {
+        ProductImages: true,
+        CPU: true,
+        GPU: true,
+        Memory: true,
+        Motherboard: true,
+        PowerSupply: true,
+        Drive: true,
+        Case: true,
+        Monitor: true,
+        CPUCooler: true,
+      },
+    });
+    res.json({
+      message: "Get Product By CategoryId Success",
+      products,
+    });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
