@@ -6,6 +6,7 @@ const cartRouter = require("./routes/cart-routes");
 const categoryRoute = require("./routes/category-route")
 const bookingRouter = require("./routes/booking-route");
 const authRouter = require("./routes/auth-routes");
+const wishListRouter = require("./routes/wishlist-route")
 const errHandler = require("./middlewares/error");
 const notFound = require("./middlewares/notFound");
 const app = express();
@@ -44,6 +45,7 @@ app.use("/cart", cartRouter);
 app.use("/user", userRouter)
 app.use("/chat", chatRouter);
 app.use("/category",categoryRoute)
+app.use("/wishlist",wishListRouter)
 readdirSync("./src/routes").map((path) =>
   app.use("/", require(`./routes/${path}`))
 );
