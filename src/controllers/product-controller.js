@@ -742,11 +742,15 @@ module.exports.updateProduct = async (req, res, next) => {
             productId: +id,
           },
         });
+        const { radiator, ...rest } = bodyInfo;
         const updateCPUCooler = await prisma.cPUCooler.update({
           where: {
             id: CPUCooler.id,
           },
-          data: bodyInfo,
+          data: {
+            ...rest,
+            radiator: +radiator,
+          },
         });
         // console.log("CPU Cooler")
         break;
