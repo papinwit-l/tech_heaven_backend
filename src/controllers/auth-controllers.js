@@ -230,6 +230,7 @@ module.exports.forgotPassword = async (req, res, next) => {
   });
   res.status(200).json({ message: "Password reset link sent to your email" });
 };
+
 module.exports.resetPassword = async (req, res, next) => {
   const { password, token } = req.body;
   try {
