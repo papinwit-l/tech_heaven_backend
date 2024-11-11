@@ -11,8 +11,8 @@ cloudinary.config({
 
 const createImage = async (images, productId, next) => {
   try {
-    if (!images || images.length === 0) {
-      return [];
+    if(!images) {
+      return
     }
     const imageData = images.map((image) => ({
       productId: productId,
@@ -711,61 +711,79 @@ module.exports.updateProduct = async (req, res, next) => {
       case "1": // CPU
         const CPU = await prisma.cPU.findFirst({
           where: {
-            productId: +id,
-          },
-        });
+            productId: +id
+          }
+        })
+        const { cores, threads, baseClock, boostClock, ...restCPU} = bodyInfo
         const updateCPU = await prisma.cPU.update({
           where: {
             id: CPU.id,
+
           },
-          data: bodyInfo,
-        });
+          data : {
+            ...restCPU,
+            cores : +cores,
+            threads: +threads,
+            baseClock: +baseClock,
+            boostClock: +boostClock,
+          }
+        })
         // console.log("CPU")
         break;
       case "2": // Monitor
-        const Monitor = await prisma.monitor.findFirst({
-          where: {
-            productId: +id,
-          },
-        });
-        const updateMonitor = await prisma.monitor.update({
-          where: {
-            id: Monitor.id,
-          },
-          data: bodyInfo,
-        });
+      const Monitor = await prisma.monitor.findFirst({
+        where: {
+          productId: +id
+        }
+      })
+      const { size, refreshRate, ...restMonitor } = bodyInfo
+      const updateMonitor = await prisma.monitor.update({
+        where: {
+          id: Monitor.id,
+        },
+        data: {
+          ...restMonitor,
+          size: +size,
+          refreshRate: +refreshRate
+        }
+      })
         // console.log("Monitor")
         break;
       case "3": // CPU Cooler
-        const CPUCooler = await prisma.cPUCooler.findFirst({
-          where: {
-            productId: +id,
-          },
-        });
-        const { radiator, ...rest } = bodyInfo;
-        const updateCPUCooler = await prisma.cPUCooler.update({
-          where: {
-            id: CPUCooler.id,
-          },
-          data: {
-            ...rest,
-            radiator: +radiator,
-          },
-        });
+      const CPUCooler = await prisma.cPUCooler.findFirst({
+        where: {
+          productId: +id
+        }
+      })
+      const { radiator, ...restCPUCooler } = bodyInfo
+      const updateCPUCooler = await prisma.cPUCooler.update({
+        where: {
+          id: CPUCooler.id,
+
+        },
+        data: {
+          ...restCPUCooler,
+          radiator: +radiator
+        }
+      })
         // console.log("CPU Cooler")
         break;
       case "4": // Power Supply
-        const PowerSupply = await prisma.powerSupply.findFirst({
-          where: {
-            productId: +id,
-          },
-        });
-        const updatePowerSupply = await prisma.powerSupply.update({
-          where: {
-            id: PowerSupply.id,
-          },
-          data: bodyInfo,
-        });
+      const PowerSupply = await prisma.powerSupply.findFirst({
+        where: {
+          productId: +id
+        }
+      })
+      const { wattage, ...restPowerSupply } = bodyInfo
+      const updatePowerSupply = await prisma.powerSupply.update({
+        where: {
+          id: PowerSupply.id,
+        },
+        data: {
+          ...restPowerSupply,
+          wattage: +wattage,
+        }
+      })
         // console.log("Power Supply")
         break;
       case "5": // Case
@@ -784,31 +802,41 @@ module.exports.updateProduct = async (req, res, next) => {
         // console.log("Case")
         break;
       case "6": // GPU
-        const GPU = await prisma.gPU.findFirst({
-          where: {
-            productId: +id,
-          },
-        });
-        const updateGPU = await prisma.gPU.update({
-          where: {
-            id: GPU.id,
-          },
-          data: bodyInfo,
-        });
+      const GPU = await prisma.gPU.findFirst({
+        where: {
+          productId: +id
+        }
+      })
+      const { vram, power, ...restGPU } = bodyInfo
+      const updateGPU = await prisma.gPU.update({
+        where: {
+          id: GPU.id,
+        },
+        data : {
+          ...restGPU,
+          vram: +vram,
+          power: +power,
+        }
+      })
         // console.log("GPU")
         break;
       case "7": // Memory
-        const Memory = await prisma.memory.findFirst({
-          where: {
-            productId: +id,
-          },
-        });
-        const updateMemory = await prisma.memory.update({
-          where: {
-            id: Memory.id,
-          },
-          data: bodyInfo,
-        });
+      const Memory = await prisma.memory.findFirst({
+        where: {
+          productId: +id
+        }
+      })
+      const { memory, busSpeed, ...restMemory } = bodyInfo
+      const updateMemory = await prisma.memory.update({
+        where: {
+          id: Memory.id,
+        },
+        data:{
+          ...restMemory,
+          memory: +memory,
+          busSpeed: +busSpeed,
+        }
+      })
         // console.log("Memory")
         break;
       case "8": // Motherboard
@@ -959,9 +987,9 @@ module.exports.listByProduct = async (req, res, next) => {
 // method POST ค้นหาสินค้า (!!!ยังไม่เสร็จ)
 module.exports.searchFiltersProduct = async (req, res, next) => {
   try {
-    const role = req.user.role;
-    if (role !== "ADMIN") {
-      return createError(403, "forbidden");
+    const role =  req.user.role
+    if(role !== "ADMIN" && role !== "USER") {
+      return createError(403, "forbidden")
     }
     // code
     res.send("Hello searchFilters Product");
