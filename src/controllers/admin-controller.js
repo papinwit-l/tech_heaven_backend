@@ -137,3 +137,84 @@ exports.deleteUser = async(req,res,next) => {
     // res.status(200).json("Delete Successfully")
     next(err)
 }
+
+
+module.exports.createCoupon = async(req,res,next)=> {
+    const {title, description, promotionDiscount, discountType, startDate, expirationDate, promotionCode, promotionType, imageUrl} = req.body
+    try {
+        const haveFile = !!req.file
+        let uploadResult = {}
+        if(haveFile){
+            uploadResult = await cloudinary.uploader.upload(req.file.path,{
+                overwrite : true,
+            })
+        }
+        const promotion = await prisma.promotion.create({
+            data: {
+              title,
+              description,
+              promotionDiscount,
+              discountType,
+              startDate: new Date(startDate),
+              expirationDate: new Date(expirationDate),
+              promotionCode,
+              promotionType,
+              imageUrl,
+            }
+    })
+    res.status(200).json(promotion)
+    } catch (err) {
+        next(err)
+        console.log(err)
+    }
+}
+
+module.exports.editCoupon = async(req,res,next) => {
+    const { id } = req.params;
+  const { title, description, promotionDiscount, discountType, startDate, expirationDate, promotionCode, promotionType, imageUrl } = req.body;
+
+  try {
+    const promotion = await prisma.promotion.update({
+      where: { id: +id },
+      data: {
+        title,
+        description,
+        promotionDiscount,
+        discountType,
+        startDate: new Date(startDate),
+        expirationDate: new Date(expirationDate),
+        promotionCode,
+        promotionType,
+        imageUrl,
+      },
+    });
+    res.status(200).json(promotion);
+  } catch (err) {
+    console.error(err);
+    next(err)
+
+  }
+};
+
+module.exports.deleteCoupon = async(req,res,next) => {
+    const {id} = req.params
+    try {
+        await prisma.promotion.delete({
+          where: { id: +id },
+        });
+        res.status(200).send('Coupon deleted successfully');
+      } catch (err) {
+        console.error(err);
+       next(err)
+      }
+}
+
+module.exports.getCoupon = async(req,res,next)=>{
+    try {
+        const promotions = await prisma.promotion.findMany();
+        res.status(200).json(promotions);
+      } catch (err) {
+        console.error(err);
+       next(err)
+      }
+}
