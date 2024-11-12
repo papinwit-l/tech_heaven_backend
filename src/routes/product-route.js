@@ -60,6 +60,6 @@ router.post("/product/drive", Authenticate.auth, createProductDrive);
 router.post("/product/accessory", Authenticate.auth, createProductAccessory);
 
 // FOR PC Build
-router.get("/products-by-category/:categoryId", getProductByCategoryId);
+router.post("/products-by-category/:categoryId", getProductByCategoryId);
 
 module.exports = router;
