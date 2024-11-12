@@ -1,83 +1,60 @@
 const prisma = require("../config/prisma");
 const createError = require("../utils/createError");
 
+
 module.exports.createCart = async (req, res, next) => {
     console.log("Show Item", req.body);
     const { item } = req.body;
     const { id } = req.user;
-    try {
-        const existCart = await prisma.cart.findFirst({
-            where: { userId: id },
-        });
+  // console.log(req.body)
+  try {
+    const existCart = await prisma.cart.findFirst({
+      where: { userId: id },
+    });
 
-        if (existCart) {
-            // ถ้ามี Cart ของผู้ใช้อยู่แล้ว ให้เพิ่มรายการใหม่หรือตรวจสอบรายการซ้ำ
-            if (item && item.length > 0) {
-                const cartItems = await Promise.all(
-                    item.map(async (item) => {
-                        const existingCartItem = await prisma.cartItem.findFirst({
-                            where: {
-                                cartId: existCart.id,
-                                productId: item.productId,
-                            },
-                        });
+    await prisma.cartItem.deleteMany({
+      where: {
+        cart: {
+          userId: id,
+        },
+      },
+    });
 
-                        if (existingCartItem) {
-                            // ถ้ารายการนี้มีอยู่แล้ว ให้เพิ่ม quantity
-                            return await prisma.cartItem.update({
-                                where: { id: existingCartItem.id },
-                                data: { quantity: existingCartItem.quantity + item.quantity },
-                            });
-                        } else {
-                            // ถ้าไม่มีรายการนี้อยู่ใน cart ให้สร้างรายการใหม่
-                            return await prisma.cartItem.create({
-                                data: {
-                                    cartId: existCart.id,
-                                    productId: item.productId,
-                                    quantity: item.quantity,
-                                },
-                            });
-                        }
-                    })
-                );
+    await prisma.cart.deleteMany({
+      where: {
+        userId: id,
+      },
+    });
 
-                res.status(200).json({ cart: existCart, cartItems });
-            } else {
-                // ถ้าไม่มี item ให้ส่งข้อมูล Cart กลับไปเฉพาะ
-                res.status(200).json({ cart: existCart });
-            }
-        } else {
-            // ถ้า Cart ยังไม่มี ให้สร้าง Cart ใหม่
-            const newCart = await prisma.cart.create({
-                data: {
-                    userId: id,
-                    status: "PENDING",
-                },
-            });
+    let products = item.map((item) => ({
+      productId: item.id,
+      quantity: item.quantity,
+      price: item.price,
+      total: item.price * item.quantity,
+    }));
+    console.log("Products", products);
 
-            if (item && item.length > 0) {
-                const cartItems = await Promise.all(
-                    item.map(async (item) => {
-                        return await prisma.cartItem.create({
-                            data: {
-                                cartId: newCart.id,
-                                productId: item.productId,
-                                quantity: item.quantity,
-                            },
-                        });
-                    })
-                );
+    let total = products.reduce((sum, item) => {
+      return sum + item.price * item.quantity;
+    }, 0);
 
-                res.status(201).json({ cart: newCart, cartItems });
-            } else {
-                res.status(201).json({ cart: newCart });
-            }
+    console.log("Total", total);
+
+    const newCart = await prisma.cart.create({
+        data: {
+            CartItems: {
+                create: products,
+            },
+            total: total,
+            userId: id,
+            status: "PENDING",
         }
-        res.send(newCart)
-    } catch (err) {
-        console.log(err);
-        next(err);
-    }
+    })
+    res.send(newCart);
+  } catch (err) {
+    console.log(err)
+    next(err);
+  }
 };
 
 module.exports.updateCartItem = async (req, res, next) => {
