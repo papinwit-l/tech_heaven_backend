@@ -34,11 +34,23 @@ model User {
   Booking       Booking[]
   PCBuild       PCBuild[]
   Wishlist      Wishlist[]
+  UserAddress   UserAddress[]
 }
 
 enum Role {
   ADMIN
   USER
+}
+
+model UserAddress {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int      @map("user_id")
+  address   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("user_addresses")
 }
 
 model UserPromotion {

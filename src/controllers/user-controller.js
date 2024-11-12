@@ -53,82 +53,10 @@ exports.createOrder = tryCatch(async (req, res) => {
       userId: userId,
     },
   });
-
-  // if (!cart) {
-  //     const total = new Decimal(0);
-  //     cart = await prisma.cart.create({
-  //         data: {
-  //             userId,
-  //             status: "PENDING",
-  //             total,
-  //         },
-  //     });
-  //     console.log("New cart created:", cart);
-  // } else {
-  //     console.log("Existing cart found:", cart);
-  // }
-
-  // const cartItems = await prisma.cartItem.findMany({
-  //     where: { cartId: cart.id },
-  //     include: { product: true },
-  // });
-
-  //   const totalPrice = cartItems.reduce(
-  //     (total, item) => total + item.product.price * item.quantity,
-  //     0
-  //   );
-
-  //   const transaction = await prisma.$transaction(async (prisma) => {
-  //     try {
-  //       const order = await prisma.order.create({
-  //         data: {
-  //           userId: userId,
-  //           status: status || "PENDING",
-  //           paymentMethod: paymentMethod || "PAYPAL",
-  //           paymentId: id,
-  //           amount: amount.toString(),
-  //           currency: currency,
-  //         },
-  //       });
-
-  //       const orderItems = cartItems.map((item) => ({
-  //         orderId: order.id,
-  //         productId: item.productId,
-  //         quantity: item.quantity,
-  //       }));
-
-  //       await prisma.orderItem.createMany({
-  //         data: orderItems,
-  //       });
-
-  //       await prisma.cart.update({
-  //         where: { id: cart.id },
-  //         data: {
-  //           status: "SUCCESS",
-  //           total: new Decimal(totalPrice),
-  //         },
-  //       });
-
-  //       await prisma.cartItem.deleteMany({
-  //         where: { cartId: cart.id },
-  //       });
-
-  //       await prisma.cart.delete({
-  //         where: { id: cart.id },
-  //       });
-
-  //       res.send(order);
-  //     } catch (error) {
-  //       console.error("Error during order creation transaction:", error);
-  //       throw new Error("Transaction failed");
-  //     }
-  //   });
-
   res.status(200).json({
     success: true,
     message: "Order created successfully",
   });
-  //   res.send("Create order successfully");
 });
 
 exports.getOrderByUserId = tryCatch(async (req, res) => {
@@ -150,4 +78,62 @@ exports.getOrderByUserId = tryCatch(async (req, res) => {
     },
   });
   res.send(orders);
+});
+
+exports.addAddress = tryCatch(async (req, res) => {
+  const userId = req.user.id;
+  const { address } = req.body;
+  await prisma.userAddress.create({
+    data: {
+      userId: userId,
+      address: address,
+    },
+  });
+  res.send("Address added successfully");
+})
+
+exports.getAllAddress = tryCatch(async (req, res) => {
+  const userId = req.user.id;
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  })
+  const address = await prisma.userAddress.findMany({
+    where: {
+      userId: userId,
+    }
+  })
+  console.log(address)
+  res.send(address)
+})
+
+exports.updateAddress = tryCatch(async (req, res) => {
+  const { addressId } = req.params;
+  const userId = req.user.id;
+  const { address } = req.body;
+
+  await prisma.userAddress.update({
+    where: {
+      id: +addressId,
+      userId: userId
+    },
+    data: {
+      address: address
+    },
+  });
+
+  res.send("Address updated successfully");
+});
+
+exports.deleteAddress = tryCatch(async (req, res) => {
+  const { addressId } = req.params;
+  const userId = req.user.id;
+  await prisma.userAddress.delete({
+    where: {
+      id: +addressId,
+      userId: userId
+    },
+  });
+  res.send("Address deleted successfully");
 });
