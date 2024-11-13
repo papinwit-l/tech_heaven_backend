@@ -32,6 +32,7 @@ const socketRoute = require("./routes/socket-route");
 const stripeRouter = require("./routes/stripe-route");
 const userRouter = require("./routes/user-route");
 const chatRouter = require("./routes/chat-route");
+const dashboardRouter = require("./routes/dashboard-route")
 
 io.on("connection", socketRoute(io));
 
@@ -47,7 +48,7 @@ app.use("/user", userRouter);
 app.use("/chat", chatRouter);
 app.use("/category", categoryRoute);
 app.use("/wishlist", wishListRouter);
-
+app.use("/dashboard", dashboardRouter)
 readdirSync("./src/routes").map((path) =>
   app.use("/", require(`./routes/${path}`))
 );
