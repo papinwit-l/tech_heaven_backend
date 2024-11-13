@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
+
 const cartRouter = require("./routes/cart-routes");
 const categoryRoute = require("./routes/category-route");
 const bookingRouter = require("./routes/booking-route");
@@ -32,6 +33,7 @@ const stripeRouter = require("./routes/stripe-route");
 const userRouter = require("./routes/user-route");
 const chatRouter = require("./routes/chat-route");
 const pcBuildRouter = require("./routes/pcbuild-route");
+const dashboardRouter = require("./routes/dashboard-route");
 
 io.on("connection", socketRoute(io));
 
@@ -48,6 +50,7 @@ app.use("/chat", chatRouter);
 app.use("/category", categoryRoute);
 app.use("/wishlist", wishListRouter);
 app.use("/pcbuild", pcBuildRouter);
+app.use("/dashboard", dashboardRouter);
 readdirSync("./src/routes").map((path) =>
   app.use("/", require(`./routes/${path}`))
 );

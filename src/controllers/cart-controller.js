@@ -1,82 +1,61 @@
 const prisma = require("../config/prisma");
 const createError = require("../utils/createError");
 
+
 module.exports.createCart = async (req, res, next) => {
     console.log("Show Item", req.body);
     const { item } = req.body;
     const { id } = req.user;
-    try {
-        const existCart = await prisma.cart.findFirst({
-            where: { userId: id },
-        });
+  // console.log(req.body)
+  try {
+    const existCart = await prisma.cart.findFirst({
+      where: { userId: id },
+    });
 
-        if (existCart) {
-            // ถ้ามี Cart ของผู้ใช้อยู่แล้ว ให้เพิ่มรายการใหม่หรือตรวจสอบรายการซ้ำ
-            if (item && item.length > 0) {
-                const cartItems = await Promise.all(
-                    item.map(async (item) => {
-                        const existingCartItem = await prisma.cartItem.findFirst({
-                            where: {
-                                cartId: existCart.id,
-                                productId: item.productId,
-                            },
-                        });
+    await prisma.cartItem.deleteMany({
+      where: {
+        cart: {
+          userId: id,
+        },
+      },
+    });
 
-                        if (existingCartItem) {
-                            // ถ้ารายการนี้มีอยู่แล้ว ให้เพิ่ม quantity
-                            return await prisma.cartItem.update({
-                                where: { id: existingCartItem.id },
-                                data: { quantity: existingCartItem.quantity + item.quantity },
-                            });
-                        } else {
-                            // ถ้าไม่มีรายการนี้อยู่ใน cart ให้สร้างรายการใหม่
-                            return await prisma.cartItem.create({
-                                data: {
-                                    cartId: existCart.id,
-                                    productId: item.productId,
-                                    quantity: item.quantity,
-                                },
-                            });
-                        }
-                    })
-                );
+    await prisma.cart.deleteMany({
+      where: {
+        userId: id,
+      },
+    });
 
-                res.status(200).json({ cart: existCart, cartItems });
-            } else {
-                // ถ้าไม่มี item ให้ส่งข้อมูล Cart กลับไปเฉพาะ
-                res.status(200).json({ cart: existCart });
-            }
-        } else {
-            // ถ้า Cart ยังไม่มี ให้สร้าง Cart ใหม่
-            const newCart = await prisma.cart.create({
-                data: {
-                    userId: id,
-                    status: "PENDING",
-                },
-            });
+    let products = item.map((item) => ({
+      productId: item.id,
+      quantity: item.quantity,
+      price: item.price,
+      total: item.price * item.quantity,
+    }));
+    console.log("Products", products);
 
-            if (item && item.length > 0) {
-                const cartItems = await Promise.all(
-                    item.map(async (item) => {
-                        return await prisma.cartItem.create({
-                            data: {
-                                cartId: newCart.id,
-                                productId: item.productId,
-                                quantity: item.quantity,
-                            },
-                        });
-                    })
-                );
+    let total = products.reduce((sum, item) => {
+      return sum + item.price * item.quantity;
+    }, 0);
 
-                res.status(201).json({ cart: newCart, cartItems });
-            } else {
-                res.status(201).json({ cart: newCart });
-            }
+    // console.log("Total", total);
+    console.log(products)
+    const newCart = await prisma.cart.create({
+        data: {
+            CartItems: {
+                create: products,
+            },
+            total: total,
+            userId: id,
+            status: "PENDING",
         }
-    } catch (err) {
-        console.log(err);
-        next(err);
-    }
+    })
+    
+    res.send(newCart);
+  } catch (err) {
+    console.log(err)
+    next(err);
+  }
 };
 
 module.exports.updateCartItem = async (req, res, next) => {
@@ -119,6 +98,7 @@ module.exports.updateCartItem = async (req, res, next) => {
 module.exports.getCart = async (req, res, next) => {
     try {
         const { userId } = req.params;
+        console.log(userId,"userId")
         const cart = await prisma.cart.findFirst({
             where: {
                 userId: +userId,
@@ -127,7 +107,11 @@ module.exports.getCart = async (req, res, next) => {
             include: {
                 CartItems: {
                     include: {
-                        product: true
+                        product : {
+                            include : {
+                                ProductImages : true
+                            }
+                        }
                     }
                 }
             }
@@ -135,6 +119,7 @@ module.exports.getCart = async (req, res, next) => {
         if (!cart) {
             return res.status(200).json({ cart: null }); // ถ้าไม่มี cart ให้ส่ง null
         }
+        console.log(cart,"carttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt")
         res.status(200).json({ cart });
     } catch (err) {
         next(err);
@@ -240,5 +225,92 @@ module.exports.addToCart = async (req, res, next) => {
         res.status(200).json({ message: "Product added to cart successfully." });
     } catch (err) {
         next(err);
+    }
+};
+
+
+
+module.exports.applyCoupon = async (req, res, next) => {
+    const { coupon } = req.body;
+    const userId = req.user.id
+    try {
+        const validCoupon = await prisma.coupon.findFirst({
+            where: {
+                name: coupon,
+                status: true,
+                expiry: { gte: new Date() } ,
+                startDate : {lte : new Date()}
+            }
+        });
+        if (!validCoupon || validCoupon.amount <= 0) {
+            throw createError(400, "Invalid, expired, or fully-used coupon");
+        }
+        
+        if (new Date() < validCoupon.startDate) {
+            throw createError(400, "This coupon is not available yet. Please wait until it becomes active.");
+        }
+        const isUsed = await prisma.couponUsed.findFirst({
+            where : {
+                userId : userId,
+                couponId : +validCoupon.id
+            }
+        })
+        console.log(isUsed)
+       if(isUsed){
+        createError(400, "This coupon already used")
+       }
+       
+
+
+       
+        const findCart = await prisma.cart.findFirst({
+            where: {
+                userId: req.user.id
+            }
+        });
+
+       
+        const result = findCart.total - (findCart.total * validCoupon.discount) / 100;
+
+        
+        const newTotal = await prisma.cart.update({
+            where: {
+                id: findCart.id
+            },
+            data: {
+                total: +result
+            }
+        });
+
+        
+        const updatedCoupon = await prisma.coupon.update({
+            where: {
+                id: +validCoupon.id
+            },
+            data: {
+                amount: validCoupon.amount - 1,
+                status: validCoupon.amount - 1 <= 0 ? false : validCoupon.status,
+            }
+        });
+        const updateUsedCoupon = await prisma.couponUsed.create({
+            data : {
+                
+                user : {
+                    connect : {
+                        id : userId
+                    }
+                },
+                coupon : {
+                    connect : {
+                        id : validCoupon.id
+                    }
+                }
+            }
+        })
+
+        res.status(200).json(updatedCoupon);
+    } catch (err) {
+        next(err);
+        console.log(err);
     }
 };
