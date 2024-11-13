@@ -24,6 +24,7 @@ const {
   createProductAccessory,
   deleteProductImage,
   getProductByCategoryId,
+  createPCBuild,
 } = require("../controllers/product-controller");
 
 // @ENDPOINT http://localhost:8000/product
@@ -58,8 +59,5 @@ router.post(
 );
 router.post("/product/drive", Authenticate.auth, createProductDrive);
 router.post("/product/accessory", Authenticate.auth, createProductAccessory);
-
-// FOR PC Build
-router.post("/products-by-category/:categoryId", getProductByCategoryId);
 
 module.exports = router;
