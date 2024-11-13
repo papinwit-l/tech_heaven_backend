@@ -9,19 +9,17 @@ exports.getOrderAdmin = async(req, res, next) => {
                     include: {
                         product: true // ดึงข้อมูลของสินค้าที่รวมในคำสั่งซื้อแต่ละรายการ
                     }
-                }
+                },
+                OrderAddress: true
             },
             orderBy: {
-                createdAt: 'desc' // เรียงลำดับจากใหม่ไปเก่า
+                createdAt: 'desc'
             }
         })
-        // res.send("getOrderAdmin")
-        // console.log("hihi")
         res.send(orders)
     } catch (err) {
         console.log(err)
         next(err)
-        // res.status(500).json({ message: "Server error"})
     }
 
 }

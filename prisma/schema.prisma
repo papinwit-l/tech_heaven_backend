@@ -46,6 +46,8 @@ model UserAddress {
   id        Int      @id @default(autoincrement())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int      @map("user_id")
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId   Int      @map("order_id")
   address   String?
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -219,17 +221,18 @@ model ProductCategory {
 }
 
 model Order {
-  id            Int         @id @default(autoincrement())
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId        Int         @map("user_id")
-  createdAt     DateTime    @default(now()) @map("created_at")
-  updatedAt     DateTime    @updatedAt @map("updated_at")
-  status        String      @default("Pending")
-  paymentMethod String?     @map("payment_method")
+  id            Int           @id @default(autoincrement())
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        Int           @map("user_id")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  status        String        @default("Pending")
+  paymentMethod String?       @map("payment_method")
   paymentId     String?
   amount        String?
   currency      String?
   OrderItems    OrderItem[]
+  OrderAddress   UserAddress[]
 }
 
 model OrderItem {
