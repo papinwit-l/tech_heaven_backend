@@ -14,26 +14,26 @@ datasource db {
 }
 
 model User {
-  id            Int             @id @default(autoincrement())
-  email         String          @unique
-  googleId      String?
-  firstName     String          @map("first_name")
-  lastName      String          @map("last_name")
-  password      String?
-  dateOfBirth   DateTime?       @map("date_of_birth")
-  profileImage  String?         @map("profile_image")
-  role          Role            @default(USER)
-  createdAt     DateTime        @default(now()) @map("created_at")
-  updatedAt     DateTime        @updatedAt @map("updated_at")
-  isActive      Boolean         @default(true)
-  UserPromotion UserPromotion[]
-  ChatMembers   ChatMember[]
-  Messages      Message[]
-  Carts         Cart[]
-  Order         Order[]
-  Booking       Booking[]
-  PCBuild       PCBuild[]
-  Wishlist      Wishlist[]
+  id           Int          @id @default(autoincrement())
+  email        String       @unique
+  googleId     String?
+  firstName    String       @map("first_name")
+  lastName     String       @map("last_name")
+  password     String?
+  dateOfBirth  DateTime?    @map("date_of_birth")
+  profileImage String?      @map("profile_image")
+  role         Role         @default(USER)
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+  isActive     Boolean      @default(true)
+  ChatMembers  ChatMember[]
+  Messages     Message[]
+  Carts        Cart[]
+  Order        Order[]
+  Booking      Booking[]
+  PCBuild      PCBuild[]
+  Wishlist     Wishlist[]
+  couponused   CouponUsed[]
 }
 
 enum Role {
@@ -41,45 +41,24 @@ enum Role {
   USER
 }
 
-model UserPromotion {
-  id          Int       @id @default(autoincrement())
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      Int       @map("user_id")
-  promotion   Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
-  promotionId Int       @map("promotion_id")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  redeemedAt  DateTime  @map("redeemed_at")
-
-  @@map("user_promotions")
+model Coupon {
+  id         Int          @id @default(autoincrement())
+  name       String
+  startDate  DateTime
+  expiry     DateTime
+  discount   Int
+  amount     Int
+  status     Boolean      @default(true)
+  couponused CouponUsed[]
 }
 
-model Promotion {
-  id                Int             @id @default(autoincrement())
-  title             String
-  description       String
-  imageUrl          String
-  createdAt         DateTime        @default(now()) @map("created_at")
-  updatedAt         DateTime        @updatedAt @map("updated_at")
-  promotionDiscount Float           @map("promotion_discount")
-  discountType      DiscountType    @map("discount_type")
-  startDate         DateTime        @map("start_date")
-  expirationDate    DateTime        @map("expiration_date")
-  promotionType     PromotionType   @map("promotion_type")
-  promotionCode     String          @map("promotion_code")
-  UserPromotion     UserPromotion[]
-}
+model CouponUsed {
+  id Int @id @default(autoincrement())
 
-enum DiscountType {
-  PERCENTAGE
-  FIXED
-}
-
-enum PromotionType {
-  NEW_USER
-  RETURNING_USER
-  BIRTHDAY
-  OTHER
+  user     User   @relation(fields: [userId], references: [id] , onDelete: Cascade)
+  userId   Int
+  coupon   Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  couponId Int
 }
 
 model ChatMember {
