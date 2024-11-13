@@ -92,12 +92,14 @@ module.exports.loginGoogle = async (req, res, next) => {
         firstName,
         lastName,
         dateOfBirth,
+        profileImage,
       },
       select: {
         email: true,
         firstName: true,
         lastName: true,
         dateOfBirth: true,
+        profileImage : true
       },
     });
     res.status(201).json({ newUser });

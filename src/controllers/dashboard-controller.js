@@ -2,55 +2,62 @@ const prisma = require("../config/prisma");
 
 exports.getDashBoardData = async (req, res, next) => {
   try {
+    // นับจำนวนผู้ใช้งานที่ isActive เป็น true
     const userCount = await prisma.user.count({
       where: {
         isActive: true,
       },
     });
-    console.log("User Count:", userCount); // เช็คค่า userCount
+    console.log("User Count:", userCount);
 
+    // นับจำนวนผู้ใช้ใหม่ที่ลงทะเบียนภายใน 7 วันที่ผ่านมา
     const newUserCount = await prisma.user.count({
-        where: {
-          createdAt: {
-            gte: new Date(new Date().setDate(new Date().getDate() - 7)), // ผู้ใช้ที่ลงทะเบียนใน 7 วันที่ผ่านมา
-          },
+      where: {
+        createdAt: {
+          gte: new Date(new Date().setDate(new Date().getDate() - 7)),
         },
-      });
-      console.log('newUserCount', newUserCount)
+      },
+    });
+    console.log("New User Count:", newUserCount);
 
-    const activePromotions = await prisma.promotion.count({
+    // นับจำนวนโปรโมชั่นที่ยัง active อยู่ในปัจจุบัน
+    const activePromotions = await prisma.coupon.count({
       where: {
         startDate: {
           lte: new Date(),
         },
-        expirationDate: {
+        expiry: {
           gte: new Date(),
         },
       },
     });
-    console.log("Active Promotions:", activePromotions); // เช็คค่า activePromotions
+    console.log("Active Promotions:", activePromotions);
 
+    // ดึงรายการ order และคำนวณรายได้รวม
     const orders = await prisma.order.findMany({
       select: { amount: true },
     });
 
-    // แปลง `amount` เป็นตัวเลขแล้วรวมค่าทั้งหมด
+    // คำนวณรายได้รวมจาก field amount
     const totalRevenue = orders.reduce(
-      (sum, order) => sum + parseFloat(order.amount || "0"),
+      (sum, order) => sum + (order.amount || 0),
       0
     );
     const totalOrders = orders.length;
     console.log("Total Revenue:", totalRevenue);
     console.log("Total Orders:", totalOrders);
 
+    // นับจำนวนคำสั่งซื้อที่ยังอยู่ในสถานะ "PENDING"
     const pendingOrders = await prisma.order.count({
-        where: {
-          status: "PENDING", // คำสั่งซื้อที่ยังไม่ชำระเงิน
-        },
-      });
+      where: {
+        status: "PENDING",
+      },
+    });
 
+    // นับจำนวน PCBuild ทั้งหมด
     const pcBuildCount = await prisma.pCBuild.count();
 
+    // ส่งข้อมูล dashboard เป็น JSON
     const dashboardData = {
       userCount,
       newUserCount,
