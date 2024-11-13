@@ -140,14 +140,16 @@ exports.deleteUser = async (req, res, next) => {
 
 
 module.exports.createCoupon = async (req, res, next) => {
-    const { name, expiry, discount, amount } = req.body
+    const { name, expiry, discount, amount,startDate } = req.body
     const expiryConvert = new Date(req.body.expiry)
+    const startDateConvert = new Date(req.body.startDate)
     console.log(req.body)
     try {
         const coupon = await prisma.coupon.create({
             data: {
                 name,
                 expiry : expiryConvert,
+                startDate : startDateConvert,
                 discount : +discount,
                 amount : +amount
             }
@@ -168,3 +170,58 @@ module.exports.getCoupon = async (req,res,next) => {
         console.log(err)
     }
 }
+
+module.exports.deleteCoupon = async(req,res,next) => {
+    try {
+        const {couponId} = req.params
+        const deleteCoupon = await prisma.coupon.delete({
+            where : {
+                id : +couponId
+            }
+        })
+        res.status(200).json("Successfully deleted")
+    } catch (err) {
+        next(err)
+        console.log(err)
+    }
+}
+
+module.exports.editCoupon = async (req, res, next) => {
+    try {
+        const { couponId } = req.params;
+        const { discount, startDate, expiry, amount } = req.body;
+        const expiryConvert = new Date(req.body.expiry)
+    const startDateConvert = new Date(req.body.startDate)
+
+        // Validate the incoming data
+        if (!discount || !startDateConvert || !expiryConvert || !amount) {
+            return res.status(400).json({ message: "Missing required fields" });
+        }
+
+        // Check if the coupon exists
+        const existingCoupon = await prisma.coupon.findUnique({
+            where: { id: +couponId },
+        });
+
+        if (!existingCoupon) {
+            return res.status(404).json({ message: "Coupon not found" });
+        }
+
+        // Perform the update
+        const updatedCoupon = await prisma.coupon.update({
+            where: { id: +couponId },
+            data: { discount : +discount, startDate : startDateConvert, expiry : expiryConvert, amount : +amount },
+        });
+
+        // Verify the updated coupon
+        const coupon = await prisma.coupon.findUnique({
+            where: { id: +couponId },
+        });
+
+        console.log("Updated Coupon:", coupon); 
+        res.status(200).json(coupon); 
+    } catch (err) {
+        next(err);
+        console.log(err);
+    }
+};
