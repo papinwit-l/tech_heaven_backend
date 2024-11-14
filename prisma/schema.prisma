@@ -14,28 +14,28 @@ datasource db {
 }
 
 model User {
-  id            Int             @id @default(autoincrement())
-  email         String          @unique
-  googleId      String?
-  firstName     String          @map("first_name")
-  lastName      String          @map("last_name")
-  password      String?
-  dateOfBirth   DateTime?       @map("date_of_birth")
-  profileImage  String?         @map("profile_image")
-  role          Role            @default(USER)
-  createdAt     DateTime        @default(now()) @map("created_at")
-  updatedAt     DateTime        @updatedAt @map("updated_at")
-  isActive      Boolean         @default(true)
-  phone         String?
-  ChatMembers   ChatMember[]
-  Messages      Message[]
-  Carts         Cart[]
-  Order         Order[]
-  Booking       Booking[]
-  PCBuild       PCBuild[]
-  Wishlist      Wishlist[]
-  UserAddress   UserAddress[]
-  couponused    CouponUsed[]
+  id           Int           @id @default(autoincrement())
+  email        String        @unique
+  googleId     String?
+  firstName    String        @map("first_name")
+  lastName     String        @map("last_name")
+  password     String?
+  dateOfBirth  DateTime?     @map("date_of_birth")
+  profileImage String?       @map("profile_image")
+  role         Role          @default(USER)
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  isActive     Boolean       @default(true)
+  phone        String?
+  ChatMembers  ChatMember[]
+  Messages     Message[]
+  Carts        Cart[]
+  Booking      Booking[]
+  PCBuild      PCBuild[]
+  Wishlist     Wishlist[]
+  UserAddress  UserAddress[]
+  couponused   CouponUsed[]
+  Order        Order[]
 }
 
 enum Role {
@@ -56,19 +56,18 @@ model UserAddress {
 }
 
 model Coupon {
-  id            Int             @id @default(autoincrement())
-  name          String
-  startDate     DateTime
-  expiry        DateTime
-  discount      Int
-  amount        Int
-  status        Boolean         @default(true)
-  couponused    CouponUsed[]
-
+  id         Int          @id @default(autoincrement())
+  name       String
+  startDate  DateTime
+  expiry     DateTime
+  discount   Int
+  amount     Int
+  status     Boolean      @default(true)
+  couponused CouponUsed[]
 }
 
 model CouponUsed {
-  id Int @id @default(autoincrement())
+  id       Int    @id @default(autoincrement())
   user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId   Int
   coupon   Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade)

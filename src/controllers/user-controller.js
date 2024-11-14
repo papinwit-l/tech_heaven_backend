@@ -1,11 +1,13 @@
 const prisma = require("../config/prisma");
+const { connect } = require("../routes/cart-routes");
 const createError = require("../utils/createError");
 const tryCatch = require("../utils/try-catch");
 
 const { Decimal } = require("@prisma/client");
 
 exports.createOrder = tryCatch(async (req, res) => {
-  const { id, amount, currency, status, payment_method_types } = req.body.paymentIntent;
+  const { id, amount, currency, status, payment_method_types } =
+    req.body.paymentIntent;
   console.log({ id, amount, currency });
 
   if (!req.user || !req.user.id) {
@@ -33,56 +35,61 @@ exports.createOrder = tryCatch(async (req, res) => {
 
   const amountTHB = amount / 100;
 
-  const transaction = await prisma.$transaction(async (prisma) => {
-    const createOrder = await prisma.order.create({
-      data: {
-        OrderItems: {
-          create: cart.CartItems.map((item) => ({
-            productId: item.productId,
-            quantity: item.quantity,
-          })),
-        },
-        userId: userId,
-        status: status,
-        paymentMethod: payment_method_types[0],
-        paymentId: id,
-        amount: amountTHB.toString(),
-        currency: currency,
-      },
-    });
-
-    for (const item of cart.CartItems) {
-      await prisma.product.update({
-        where: { id: item.productId },
+  const transaction = await prisma
+    .$transaction(async (prisma) => {
+      const createOrder = await prisma.order.create({
         data: {
-          stock: {
-            decrement: item.quantity, 
+          OrderItems: {
+            create: cart.CartItems.map((item) => ({
+              productId: item.productId,
+              quantity: item.quantity,
+            })),
           },
+          user: {
+            connect: {
+              id: userId,
+            },
+          },
+          status: status,
+          paymentMethod: payment_method_types[0],
+          paymentId: id,
+          amount: amountTHB.toString(),
+          currency: currency,
         },
       });
-    }
-    console.log("Created Order:", createOrder);
 
-    const deletedCart = await prisma.cart.deleteMany({
-      where: {
-        userId: userId,
-      },
+      for (const item of cart.CartItems) {
+        await prisma.product.update({
+          where: { id: item.productId },
+          data: {
+            stock: {
+              decrement: item.quantity,
+            },
+          },
+        });
+      }
+      console.log("Created Order:", createOrder);
+
+      const deletedCart = await prisma.cart.deleteMany({
+        where: {
+          userId: userId,
+        },
+      });
+
+      console.log("Deleted Cart Result:", deletedCart);
+
+      return createOrder;
+    })
+    .catch((error) => {
+      console.error("Error in transaction:", error);
+      throw new Error("Failed to create order and delete cart");
     });
-
-    console.log("Deleted Cart Result:", deletedCart);
-
-    return createOrder;
-  }).catch((error) => {
-    console.error("Error in transaction:", error);
-    throw new Error("Failed to create order and delete cart");
-  });
 
   res.status(200).json({
     success: true,
     message: "Order created and cart deleted successfully",
   });
 });
-
 
 exports.getOrderByUserId = tryCatch(async (req, res) => {
   const userId = req.user.id;
@@ -115,7 +122,7 @@ exports.addAddress = tryCatch(async (req, res) => {
     },
   });
   res.send("Address added successfully");
-})
+});
 
 exports.getAllAddress = tryCatch(async (req, res) => {
   const userId = req.user.id;
@@ -123,15 +130,15 @@ exports.getAllAddress = tryCatch(async (req, res) => {
     where: {
       id: userId,
     },
-  })
+  });
   const address = await prisma.userAddress.findMany({
     where: {
       userId: userId,
-    }
-  })
-  console.log(address)
-  res.send(address)
-})
+    },
+  });
+  console.log(address);
+  res.send(address);
+});
 
 exports.updateAddress = tryCatch(async (req, res) => {
   const { addressId } = req.params;
@@ -141,10 +148,10 @@ exports.updateAddress = tryCatch(async (req, res) => {
   await prisma.userAddress.update({
     where: {
       id: +addressId,
-      userId: userId
+      userId: userId,
     },
     data: {
-      address: address
+      address: address,
     },
   });
 
@@ -157,7 +164,7 @@ exports.deleteAddress = tryCatch(async (req, res) => {
   await prisma.userAddress.delete({
     where: {
       id: +addressId,
-      userId: userId
+      userId: userId,
     },
   });
   res.send("Address deleted successfully");
