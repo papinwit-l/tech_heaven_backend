@@ -44,8 +44,10 @@ exports.getDashBoardData = async (req, res, next) => {
       0
     );
     const totalOrders = orders.length;
+    const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0
     console.log("Total Revenue:", totalRevenue);
     console.log("Total Orders:", totalOrders);
+    console.log('averageOrderValue', averageOrderValue)
 
     // นับจำนวนคำสั่งซื้อที่ยังอยู่ในสถานะ "PENDING"
     const pendingOrders = await prisma.order.count({
@@ -57,6 +59,23 @@ exports.getDashBoardData = async (req, res, next) => {
     // นับจำนวน PCBuild ทั้งหมด
     const pcBuildCount = await prisma.pCBuild.count();
 
+    // นับจำนวนคูปองที่ถูกใช้
+    const couponUsedCount = await prisma.coupon.count({
+      where: {
+        couponused: {
+          some: {} // คูปองที่ถูกใช้ในคำสั่งซื้อ
+        }
+      }
+    })
+
+    // แสดงข้อมูลคำสั่งซื้อแยกตามสถานะ
+    const orderStatusCounts = await prisma.order.groupBy({
+      by: ['status'],
+      _count: {
+        _all: true,
+      }
+    })
+
     // ส่งข้อมูล dashboard เป็น JSON
     const dashboardData = {
       userCount,
@@ -64,8 +83,11 @@ exports.getDashBoardData = async (req, res, next) => {
       activePromotions,
       totalOrders,
       totalRevenue,
+      averageOrderValue,
       pendingOrders,
       pcBuildCount,
+      couponUsedCount,
+      orderStatusCounts,
     };
 
     res.status(200).json(dashboardData);
@@ -74,3 +96,4 @@ exports.getDashBoardData = async (req, res, next) => {
     next(err);
   }
 };
+
