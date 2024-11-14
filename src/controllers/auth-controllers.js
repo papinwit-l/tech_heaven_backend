@@ -204,7 +204,15 @@ module.exports.loginGoogle = async (req, res, next) => {
   }
 };
 module.exports.getMe = async (req, res, next) => {
-  res.status(200).json({ user: req.user });
+  const user = await prisma.user.findUnique({
+    where: {
+      id: req.user.id,
+    },
+    include: {
+      UserAddress: true,
+    },
+  })
+  res.status(200).json({user});
 };
 
 module.exports.forgotPassword = async (req, res, next) => {
@@ -234,6 +242,7 @@ module.exports.forgotPassword = async (req, res, next) => {
   });
   res.status(200).json({ message: "Password reset link sent to your email" });
 };
+
 module.exports.resetPassword = async (req, res, next) => {
   const { password, token } = req.body;
   try {
