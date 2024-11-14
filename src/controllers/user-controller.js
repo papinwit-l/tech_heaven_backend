@@ -5,10 +5,13 @@ const tryCatch = require("../utils/try-catch");
 
 const { Decimal } = require("@prisma/client");
 
-exports.createOrder = tryCatch(async (req, res) => {
+exports.createOrder = tryCatch(async (req, res, next) => {
   const { id, amount, currency, status, payment_method_types } =
     req.body.paymentIntent;
   console.log({ id, amount, currency });
+
+  const { addressId } = req.body;
+  console.log("idfwjoqeiofjeiowgjew", req.body, "iofejwiopfjew")
 
   if (!req.user || !req.user.id) {
     console.log("User not authenticated:", req.user);
@@ -37,26 +40,63 @@ exports.createOrder = tryCatch(async (req, res) => {
 
   const transaction = await prisma
     .$transaction(async (prisma) => {
-      const createOrder = await prisma.order.create({
-        data: {
-          OrderItems: {
-            create: cart.CartItems.map((item) => ({
-              productId: item.productId,
-              quantity: item.quantity,
-            })),
-          },
-          user: {
-            connect: {
-              id: userId,
+      console.log(("pppppppppppppppppppp"))
+      const createOrder = async () => {
+        console.log(("sdaasdpppppppppppppppppppp"))
+        try {
+          const userAddress = await prisma.userAddress.findFirst({
+            where: {
+              id: +addressId
             },
-          },
-          status: status,
-          paymentMethod: payment_method_types[0],
-          paymentId: id,
-          amount: amountTHB.toString(),
-          currency: currency,
-        },
-      });
+          });
+      
+          if (!userAddress) {
+             createError(400,'No address found for this user');
+          }
+          const checkUserAddress = await prisma.userAddress.findFirst({
+            where: {
+              userId: userAddress.id
+            }
+          })
+
+          if(!checkUserAddress){
+            createError(400,'No address found for this user')
+          }
+
+          const order = await prisma.order.create({
+            data: {
+              OrderItems: {
+                create: cart.CartItems.map((item) => ({
+                  productId: item.productId,
+                  quantity: item.quantity,
+                })),
+              },
+              user: {
+                connect: {
+                  id: userId,
+                },
+              },
+              status: status,
+              paymentMethod: payment_method_types[0],
+              paymentId: id,
+              amount: amountTHB.toString(),
+              currency: currency,
+              orderAddress: {
+                connect: {
+                  id: userAddress.id,
+                },
+              },
+            },
+          });
+          console.log("Created Order:", order);
+
+          return order;
+        } catch (error) {
+          console.error('Error creating order:', error);
+          console.log('Error creating order:', error);
+          throw error;
+        }
+      };
 
       for (const item of cart.CartItems) {
         await prisma.product.update({
@@ -68,7 +108,7 @@ exports.createOrder = tryCatch(async (req, res) => {
           },
         });
       }
-      console.log("Created Order:", createOrder);
+      // console.log("Created Order:", createOrder);
 
       const deletedCart = await prisma.cart.deleteMany({
         where: {
@@ -78,11 +118,11 @@ exports.createOrder = tryCatch(async (req, res) => {
 
       console.log("Deleted Cart Result:", deletedCart);
 
-      return createOrder;
+      return createOrder();
     })
     .catch((error) => {
       console.error("Error in transaction:", error);
-      throw new Error("Failed to create order and delete cart");
+      return createError(400,"Failed to create order and delete cart");
     });
 
   res.status(200).json({
@@ -115,12 +155,14 @@ exports.getOrderByUserId = tryCatch(async (req, res) => {
 exports.addAddress = tryCatch(async (req, res) => {
   const userId = req.user.id;
   const { address } = req.body;
-  await prisma.userAddress.create({
+  const response = await prisma.userAddress.create({
     data: {
       userId: userId,
       address: address,
     },
   });
+  console.log("Add address", response);
+  console.log("Address added successfully");
   res.send("Address added successfully");
 });
 
