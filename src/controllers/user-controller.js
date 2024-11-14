@@ -51,6 +51,16 @@ exports.createOrder = tryCatch(async (req, res) => {
       },
     });
 
+    for (const item of cart.CartItems) {
+      await prisma.product.update({
+        where: { id: item.productId },
+        data: {
+          stock: {
+            decrement: item.quantity, 
+          },
+        },
+      });
+    }
     console.log("Created Order:", createOrder);
 
     const deletedCart = await prisma.cart.deleteMany({

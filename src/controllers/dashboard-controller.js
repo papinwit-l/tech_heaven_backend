@@ -39,10 +39,10 @@ exports.getDashBoardData = async (req, res, next) => {
     });
 
     // คำนวณรายได้รวมจาก field amount
-    const totalRevenue = orders.reduce(
-      (sum, order) => sum + (order.amount || 0),
+    const totalRevenue = +(orders.reduce(
+      (sum, order) => sum + (parseFloat(order.amount) || 0),
       0
-    );
+    ));
     const totalOrders = orders.length;
     const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0
     console.log("Total Revenue:", totalRevenue);

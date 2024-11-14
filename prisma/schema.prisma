@@ -26,7 +26,7 @@ model User {
   createdAt     DateTime        @default(now()) @map("created_at")
   updatedAt     DateTime        @updatedAt @map("updated_at")
   isActive      Boolean         @default(true)
-  UserPromotion UserPromotion[]
+  phone         String?
   ChatMembers   ChatMember[]
   Messages      Message[]
   Carts         Cart[]
@@ -55,19 +55,6 @@ model UserAddress {
   @@map("user_addresses")
 }
 
-model UserPromotion {
-  id          Int      @id @default(autoincrement())
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      Int      @map("user_id")
-  promotion   Coupon   @relation(fields: [promotionId], references: [id], onDelete: Cascade)
-  promotionId Int      @map("promotion_id")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-  redeemedAt  DateTime @map("redeemed_at")
-
-  @@map("user_promotions")
-}
-
 model Coupon {
   id            Int             @id @default(autoincrement())
   name          String
@@ -77,12 +64,11 @@ model Coupon {
   amount        Int
   status        Boolean         @default(true)
   couponused    CouponUsed[]
-  UserPromotion UserPromotion[]
+
 }
 
 model CouponUsed {
   id Int @id @default(autoincrement())
-
   user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId   Int
   coupon   Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
