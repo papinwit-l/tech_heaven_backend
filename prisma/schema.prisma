@@ -14,26 +14,28 @@ datasource db {
 }
 
 model User {
-  id           Int          @id @default(autoincrement())
-  email        String       @unique
-  googleId     String?
-  firstName    String       @map("first_name")
-  lastName     String       @map("last_name")
-  password     String?
-  dateOfBirth  DateTime?    @map("date_of_birth")
-  profileImage String?      @map("profile_image")
-  role         Role         @default(USER)
-  createdAt    DateTime     @default(now()) @map("created_at")
-  updatedAt    DateTime     @updatedAt @map("updated_at")
-  isActive     Boolean      @default(true)
-  ChatMembers  ChatMember[]
-  Messages     Message[]
-  Carts        Cart[]
-  Order        Order[]
-  Booking      Booking[]
-  PCBuild      PCBuild[]
-  Wishlist     Wishlist[]
-  couponused   CouponUsed[]
+  id            Int             @id @default(autoincrement())
+  email         String          @unique
+  googleId      String?
+  firstName     String          @map("first_name")
+  lastName      String          @map("last_name")
+  password      String?
+  dateOfBirth   DateTime?       @map("date_of_birth")
+  profileImage  String?         @map("profile_image")
+  role          Role            @default(USER)
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+  isActive      Boolean         @default(true)
+  UserPromotion UserPromotion[]
+  ChatMembers   ChatMember[]
+  Messages      Message[]
+  Carts         Cart[]
+  Order         Order[]
+  Booking       Booking[]
+  PCBuild       PCBuild[]
+  Wishlist      Wishlist[]
+  UserAddress   UserAddress[]
+  couponused    CouponUsed[]
 }
 
 enum Role {
@@ -41,15 +43,41 @@ enum Role {
   USER
 }
 
+model UserAddress {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int      @map("user_id")
+  address   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  Order     Order[]
+
+  @@map("user_addresses")
+}
+
+model UserPromotion {
+  id          Int      @id @default(autoincrement())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int      @map("user_id")
+  promotion   Coupon   @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  promotionId Int      @map("promotion_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  redeemedAt  DateTime @map("redeemed_at")
+
+  @@map("user_promotions")
+}
+
 model Coupon {
-  id         Int          @id @default(autoincrement())
-  name       String
-  startDate  DateTime
-  expiry     DateTime
-  discount   Int
-  amount     Int
-  status     Boolean      @default(true)
-  couponused CouponUsed[]
+  id            Int             @id @default(autoincrement())
+  name          String
+  startDate     DateTime
+  expiry        DateTime
+  discount      Int
+  amount        Int
+  status        Boolean         @default(true)
+  couponused    CouponUsed[]
+  UserPromotion UserPromotion[]
 }
 
 model CouponUsed {
@@ -186,17 +214,19 @@ model ProductCategory {
 }
 
 model Order {
-  id            Int         @id @default(autoincrement())
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId        Int         @map("user_id")
-  createdAt     DateTime    @default(now()) @map("created_at")
-  updatedAt     DateTime    @updatedAt @map("updated_at")
-  status        String      @default("Pending")
-  paymentMethod String?     @map("payment_method")
-  paymentId     String?
-  amount        String?
-  currency      String?
-  OrderItems    OrderItem[]
+  id             Int         @id @default(autoincrement())
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         Int         @map("user_id")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+  status         String      @default("Pending")
+  paymentMethod  String?     @map("payment_method")
+  paymentId      String?
+  amount         String?
+  currency       String?
+  OrderItems     OrderItem[]
+  orderAddress   UserAddress @relation(fields: [orderAddressId], references: [id], onDelete: Cascade)
+  orderAddressId Int         @map("order_address_id")
 }
 
 model OrderItem {
