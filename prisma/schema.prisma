@@ -35,6 +35,7 @@ model User {
   PCBuild       PCBuild[]
   Wishlist      Wishlist[]
   UserAddress   UserAddress[]
+  couponused    CouponUsed[]
 }
 
 enum Role {
@@ -56,44 +57,37 @@ model UserAddress {
 }
 
 model UserPromotion {
-  id          Int       @id @default(autoincrement())
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      Int       @map("user_id")
-  promotion   Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
-  promotionId Int       @map("promotion_id")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  redeemedAt  DateTime  @map("redeemed_at")
+  id          Int      @id @default(autoincrement())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int      @map("user_id")
+  promotion   Coupon   @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  promotionId Int      @map("promotion_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  redeemedAt  DateTime @map("redeemed_at")
 
   @@map("user_promotions")
 }
 
-model Promotion {
-  id                Int             @id @default(autoincrement())
-  title             String
-  description       String
-  imageUrl          String
-  createdAt         DateTime        @default(now()) @map("created_at")
-  updatedAt         DateTime        @updatedAt @map("updated_at")
-  promotionDiscount Float           @map("promotion_discount")
-  discountType      DiscountType    @map("discount_type")
-  startDate         DateTime        @map("start_date")
-  expirationDate    DateTime        @map("expiration_date")
-  promotionType     PromotionType   @map("promotion_type")
-  promotionCode     String          @map("promotion_code")
-  UserPromotion     UserPromotion[]
+model Coupon {
+  id            Int             @id @default(autoincrement())
+  name          String
+  startDate     DateTime
+  expiry        DateTime
+  discount      Int
+  amount        Int
+  status        Boolean         @default(true)
+  couponused    CouponUsed[]
+  UserPromotion UserPromotion[]
 }
 
-enum DiscountType {
-  PERCENTAGE
-  FIXED
-}
+model CouponUsed {
+  id Int @id @default(autoincrement())
 
-enum PromotionType {
-  NEW_USER
-  RETURNING_USER
-  BIRTHDAY
-  OTHER
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   Int
+  coupon   Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  couponId Int
 }
 
 model ChatMember {
@@ -232,7 +226,7 @@ model Order {
   amount        String?
   currency      String?
   OrderItems    OrderItem[]
-  OrderAddress   UserAddress[]
+  OrderAddress  UserAddress[]
 }
 
 model OrderItem {
@@ -292,8 +286,10 @@ model PCBuild {
   powerSupplyId Int?         @map("power_supply_id")
   case          Case?        @relation(fields: [caseId], references: [id], onDelete: Cascade)
   caseId        Int?         @map("case_id")
-  drive         Drive?       @relation(fields: [driveId], references: [id], onDelete: Cascade)
+  drive         Drive?       @relation(name: "HDD", fields: [driveId], references: [id], onDelete: Cascade)
   driveId       Int?         @map("drive_id")
+  ssd           Drive?       @relation(name: "SSD", fields: [ssdId], references: [id], onDelete: Cascade)
+  ssdId         Int?         @map("ssd_id")
   cpuCooler     CPUCooler?   @relation(fields: [cpuCoolerId], references: [id], onDelete: Cascade)
   cpuCoolerId   Int?         @map("cpu_cooler_id")
   monitor       Monitor?     @relation(fields: [monitorId], references: [id], onDelete: Cascade)
@@ -390,18 +386,19 @@ model Case {
 }
 
 model Drive {
-  id        Int         @id @default(autoincrement())
-  name      String
-  model     String
-  createdAt DateTime    @default(now()) @map("created_at")
-  updatedAt DateTime    @updatedAt @map("updated_at")
-  product   Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
-  productId Int         @map("product_id")
-  size      String
-  type      DriveType
-  speed     String
-  format    DriveFormat
-  PCBuild   PCBuild[]
+  id         Int         @id @default(autoincrement())
+  name       String
+  model      String
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId  Int         @map("product_id")
+  size       String
+  type       DriveType
+  speed      String
+  format     DriveFormat
+  HDDPCBuild PCBuild[]   @relation(name: "HDD")
+  SSDPCBuild PCBuild[]   @relation(name: "SSD")
 }
 
 enum DriveType {
