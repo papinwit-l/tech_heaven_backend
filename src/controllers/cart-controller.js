@@ -1,11 +1,10 @@
 const prisma = require("../config/prisma");
 const createError = require("../utils/createError");
 
-
 module.exports.createCart = async (req, res, next) => {
-    console.log("Show Item", req.body);
-    const { item } = req.body;
-    const { id } = req.user;
+  console.log("Show Item", req.body);
+  const { item } = req.body;
+  const { id } = req.user;
   // console.log(req.body)
   try {
     const existCart = await prisma.cart.findFirst({
@@ -41,21 +40,21 @@ module.exports.createCart = async (req, res, next) => {
     console.log("Total", total);
 
     // console.log("Total", total);
-    console.log(products)
+    console.log(products);
     const newCart = await prisma.cart.create({
-        data: {
-            CartItems: {
-                create: products,
-            },
-            total: total,
-            userId: id,
-            status: "PENDING",
-        }
-    })
-    
+      data: {
+        CartItems: {
+          create: products,
+        },
+        total: total,
+        userId: id,
+        status: "PENDING",
+      },
+    });
+
     res.send(newCart);
   } catch (err) {
-    console.log(err)
+    console.log(err);
     next(err);
   }
 };
@@ -108,11 +107,17 @@ module.exports.getCart = async (req, res, next) => {
       include: {
         CartItems: {
           include: {
-            product: true,
+            product: {
+              include: {
+                ProductImages: true,
+              },
+            },
           },
         },
       },
     });
+    console.log(cart);
+    console.log(cart.CartItems);
     if (!cart) {
       return res.status(200).json({ cart: null }); // ถ้าไม่มี cart ให้ส่ง null
     }
@@ -226,89 +231,84 @@ module.exports.addToCart = async (req, res, next) => {
   }
 };
 
-
-
 module.exports.applyCoupon = async (req, res, next) => {
-    const { coupon } = req.body;
-    const userId = req.user.id
-    try {
-        const validCoupon = await prisma.coupon.findFirst({
-            where: {
-                name: coupon,
-                status: true,
-                expiry: { gte: new Date() } ,
-                startDate : {lte : new Date()}
-            }
-        });
-        if (!validCoupon || validCoupon.amount <= 0) {
-            throw createError(400, "Invalid, expired, or fully-used coupon");
-        }
-        
-        if (new Date() < validCoupon.startDate) {
-            throw createError(400, "This coupon is not available yet. Please wait until it becomes active.");
-        }
-        const isUsed = await prisma.couponUsed.findFirst({
-            where : {
-                userId : userId,
-                couponId : +validCoupon.id
-            }
-        })
-        console.log(isUsed)
-       if(isUsed){
-        createError(400, "This coupon already used")
-       }
-       
-
-
-       
-        const findCart = await prisma.cart.findFirst({
-            where: {
-                userId: req.user.id
-            }
-        });
-
-       
-        const result = findCart.total - (findCart.total * validCoupon.discount) / 100;
-
-        
-        const newTotal = await prisma.cart.update({
-            where: {
-                id: findCart.id
-            },
-            data: {
-                total: +result
-            }
-        });
-
-        
-        const updatedCoupon = await prisma.coupon.update({
-            where: {
-                id: +validCoupon.id
-            },
-            data: {
-                amount: validCoupon.amount - 1,
-                status: validCoupon.amount - 1 <= 0 ? false : validCoupon.status,
-            }
-        });
-        const updateUsedCoupon = await prisma.couponUsed.create({
-            data : {
-                
-                user : {
-                    connect : {
-                        id : userId
-                    }
-                },
-                coupon : {
-                    connect : {
-                        id : validCoupon.id
-                    }
-                }
-            }
-        })
-
-        res.status(200).json(updatedCoupon);
-    } catch (err) {
-        next(err);
-        console.log(err);
+  const { coupon } = req.body;
+  const userId = req.user.id;
+  try {
+    const validCoupon = await prisma.coupon.findFirst({
+      where: {
+        name: coupon,
+        status: true,
+        expiry: { gte: new Date() },
+        startDate: { lte: new Date() },
+      },
+    });
+    if (!validCoupon || validCoupon.amount <= 0) {
+      throw createError(400, "Invalid, expired, or fully-used coupon");
     }
+
+    if (new Date() < validCoupon.startDate) {
+      throw createError(
+        400,
+        "This coupon is not available yet. Please wait until it becomes active."
+      );
+    }
+    const isUsed = await prisma.couponUsed.findFirst({
+      where: {
+        userId: userId,
+        couponId: +validCoupon.id,
+      },
+    });
+    console.log(isUsed);
+    if (isUsed) {
+      createError(400, "This coupon already used");
+    }
+
+    const findCart = await prisma.cart.findFirst({
+      where: {
+        userId: req.user.id,
+      },
+    });
+
+    const result =
+      findCart.total - (findCart.total * validCoupon.discount) / 100;
+
+    const newTotal = await prisma.cart.update({
+      where: {
+        id: findCart.id,
+      },
+      data: {
+        total: +result,
+      },
+    });
+
+    const updatedCoupon = await prisma.coupon.update({
+      where: {
+        id: +validCoupon.id,
+      },
+      data: {
+        amount: validCoupon.amount - 1,
+        status: validCoupon.amount - 1 <= 0 ? false : validCoupon.status,
+      },
+    });
+    const updateUsedCoupon = await prisma.couponUsed.create({
+      data: {
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
+        coupon: {
+          connect: {
+            id: validCoupon.id,
+          },
+        },
+      },
+    });
+
+    res.status(200).json(updatedCoupon);
+  } catch (err) {
+    next(err);
+    console.log(err);
+  }
 };
