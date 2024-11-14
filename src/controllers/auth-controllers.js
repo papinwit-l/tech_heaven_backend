@@ -11,7 +11,7 @@ const fs = require("fs");
 const path = require("path");
 
 module.exports.register = async (req, res, next) => {
-  const { email, password, firstName, lastName, dateOfBirth } = req.input;
+  const { email, password, firstName, lastName, dateOfBirth, phone } = req.input;
   try {
     const { SignupMethod } = req.body;
     const user = await prisma.user.findUnique({
@@ -30,12 +30,14 @@ module.exports.register = async (req, res, next) => {
         firstName,
         lastName,
         dateOfBirth,
+        phone,
       },
       select: {
         email: true,
         firstName: true,
         lastName: true,
         dateOfBirth: true,
+        phone : true
       },
     });
     res.status(201).json({ newUser });
@@ -254,7 +256,7 @@ module.exports.resetPassword = async (req, res, next) => {
 module.exports.updateUser = async (req, res, next) => {
   const userId = req.user.id;
   console.log(req.user, "11111");
-  const { firstName, lastName, email, password } = req.body;
+  const { firstName, lastName, email, password,phone } = req.body;
 
   console.log("Received update request from auth-cont:", req.body);
 
@@ -269,6 +271,7 @@ module.exports.updateUser = async (req, res, next) => {
     firstName,
     lastName,
     email,
+    phone,
   };
 
   // 3. Check if a new password is provided

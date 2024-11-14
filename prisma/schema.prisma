@@ -26,6 +26,7 @@ model User {
   createdAt    DateTime     @default(now()) @map("created_at")
   updatedAt    DateTime     @updatedAt @map("updated_at")
   isActive     Boolean      @default(true)
+  phone        String?
   ChatMembers  ChatMember[]
   Messages     Message[]
   Carts        Cart[]

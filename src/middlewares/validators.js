@@ -60,6 +60,11 @@ const registerSchema = Joi.object({
             "date.base": "Date of birth must be a valid date.",
             "date.less": "Date of birth must be in the past.",
             "any.required": "Date of birth is required."
+        }),
+    phone: Joi.string()
+        .pattern(/^[0-9]{10}$/)
+        .messages({
+            'string.pattern.base': 'Phone number must be a 10-digit number'
         })
 })
 const loginSchema = Joi.object({
