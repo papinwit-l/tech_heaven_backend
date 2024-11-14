@@ -55,7 +55,7 @@ model Coupon {
 model CouponUsed {
   id Int @id @default(autoincrement())
 
-  user     User   @relation(fields: [userId], references: [id] , onDelete: Cascade)
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId   Int
   coupon   Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
   couponId Int
@@ -256,8 +256,10 @@ model PCBuild {
   powerSupplyId Int?         @map("power_supply_id")
   case          Case?        @relation(fields: [caseId], references: [id], onDelete: Cascade)
   caseId        Int?         @map("case_id")
-  drive         Drive?       @relation(fields: [driveId], references: [id], onDelete: Cascade)
+  drive         Drive?       @relation(name: "HDD", fields: [driveId], references: [id], onDelete: Cascade)
   driveId       Int?         @map("drive_id")
+  ssd           Drive?       @relation(name: "SSD", fields: [ssdId], references: [id], onDelete: Cascade)
+  ssdId         Int?         @map("ssd_id")
   cpuCooler     CPUCooler?   @relation(fields: [cpuCoolerId], references: [id], onDelete: Cascade)
   cpuCoolerId   Int?         @map("cpu_cooler_id")
   monitor       Monitor?     @relation(fields: [monitorId], references: [id], onDelete: Cascade)
@@ -354,18 +356,19 @@ model Case {
 }
 
 model Drive {
-  id        Int         @id @default(autoincrement())
-  name      String
-  model     String
-  createdAt DateTime    @default(now()) @map("created_at")
-  updatedAt DateTime    @updatedAt @map("updated_at")
-  product   Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
-  productId Int         @map("product_id")
-  size      String
-  type      DriveType
-  speed     String
-  format    DriveFormat
-  PCBuild   PCBuild[]
+  id         Int         @id @default(autoincrement())
+  name       String
+  model      String
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId  Int         @map("product_id")
+  size       String
+  type       DriveType
+  speed      String
+  format     DriveFormat
+  HDDPCBuild PCBuild[]   @relation(name: "HDD")
+  SSDPCBuild PCBuild[]   @relation(name: "SSD")
 }
 
 enum DriveType {
