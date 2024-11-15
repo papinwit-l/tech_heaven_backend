@@ -10,7 +10,7 @@ exports.getOrderAdmin = async (req, res, next) => {
                         product: true // ดึงข้อมูลของสินค้าที่รวมในคำสั่งซื้อแต่ละรายการ
                     }
                 },
-                OrderAddress: true
+                orderAddress: true
             },
             orderBy: {
                 createdAt: 'desc'
