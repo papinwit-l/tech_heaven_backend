@@ -186,6 +186,18 @@ const getProductPart = async (categoryId, filter) => {
           Accessory: true,
         },
       });
+    default: // Accessory
+      if (categoryId >= 11) {
+        return await prisma.product.findMany({
+          where: {
+            categoryId: +categoryId,
+          },
+          include: {
+            ProductImages: true,
+          },
+        });
+      }
+      return createError(400, "Invalid categoryId");
   }
 };
 
