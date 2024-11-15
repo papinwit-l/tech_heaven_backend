@@ -704,8 +704,8 @@ module.exports.updateProduct = async (req, res, next) => {
     delete bodyInfo.stock;
     delete bodyInfo.categoryId;
     // console.log('categoryId', categoryId)
-    switch (String(categoryId)) {
-      case "1": // CPU
+    switch (categoryId) {
+      case 1: // CPU
         const CPU = await prisma.cPU.findFirst({
           where: {
             productId: +id,
@@ -726,7 +726,7 @@ module.exports.updateProduct = async (req, res, next) => {
         });
         // console.log("CPU")
         break;
-      case "2": // Monitor
+      case 2: // Monitor
         const Monitor = await prisma.monitor.findFirst({
           where: {
             productId: +id,
@@ -745,7 +745,7 @@ module.exports.updateProduct = async (req, res, next) => {
         });
         // console.log("Monitor")
         break;
-      case "3": // CPU Cooler
+      case 3: // CPU Cooler
         const CPUCooler = await prisma.cPUCooler.findFirst({
           where: {
             productId: +id,
@@ -763,7 +763,7 @@ module.exports.updateProduct = async (req, res, next) => {
         });
         // console.log("CPU Cooler")
         break;
-      case "4": // Power Supply
+      case 4: // Power Supply
         const PowerSupply = await prisma.powerSupply.findFirst({
           where: {
             productId: +id,
@@ -781,7 +781,7 @@ module.exports.updateProduct = async (req, res, next) => {
         });
         // console.log("Power Supply")
         break;
-      case "5": // Case
+      case 5: // Case
         // console.log('bodyInfo', bodyInfo)
         const itemCase = await prisma.case.findFirst({
           where: {
@@ -796,7 +796,7 @@ module.exports.updateProduct = async (req, res, next) => {
         });
         // console.log("Case")
         break;
-      case "6": // GPU
+      case 6: // GPU
         const GPU = await prisma.gPU.findFirst({
           where: {
             productId: +id,
@@ -815,7 +815,7 @@ module.exports.updateProduct = async (req, res, next) => {
         });
         // console.log("GPU")
         break;
-      case "7": // Memory
+      case 7: // Memory
         const Memory = await prisma.memory.findFirst({
           where: {
             productId: +id,
@@ -834,7 +834,7 @@ module.exports.updateProduct = async (req, res, next) => {
         });
         // console.log("Memory")
         break;
-      case "8": // Motherboard
+      case 8: // Motherboard
         const Motherboard = await prisma.motherboard.findFirst({
           where: {
             productId: +id,
@@ -848,7 +848,7 @@ module.exports.updateProduct = async (req, res, next) => {
         });
         // console.log("Motherboard")
         break;
-      case "9": // Drive
+      case 9: // Drive
         const Drive = await prisma.drive.findFirst({
           where: {
             productId: +id,
@@ -862,7 +862,7 @@ module.exports.updateProduct = async (req, res, next) => {
         });
         // console.log("Drive");
         break;
-      case "10": // Accessory
+      case 10: // Accessory
         const Accessory = await prisma.accessory.findFirst({
           where: {
             productId: +id,
@@ -874,6 +874,12 @@ module.exports.updateProduct = async (req, res, next) => {
           },
           data: bodyInfo,
         });
+        breakl;
+      default:
+        if (categoryId >= 11) {
+          break;
+        }
+        return createError(400, "Invalid categoryId");
       // console.log("Accessory");
     }
 
@@ -1056,6 +1062,41 @@ module.exports.deleteProductImage = async (req, res, next) => {
       });
     }
     res.status(200).json({ message: "Remove Image Success!!!" });
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+};
+
+module.exports.createProductOther = async (req, res, next) => {
+  try {
+    const role = req.user.role;
+    if (role !== "ADMIN") {
+      return createError(403, "forbidden");
+    }
+    const { name, description, price, categoryId, stock } = req.body.form;
+    const images = req.body?.image.images;
+
+    const product = await prisma.product.create({
+      data: {
+        name: name,
+        description: description,
+        price: parseFloat(price),
+        stock: +stock,
+        categoryId: +categoryId,
+        stock: +stock,
+      },
+    });
+
+    const newImages = await createImage(images, product.id, next);
+
+    res.json({
+      message: "Product created successfully",
+      data: {
+        product,
+        image: newImages,
+      },
+    });
   } catch (err) {
     console.log(err);
     next(err);
