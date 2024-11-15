@@ -74,6 +74,9 @@ exports.createOrder = tryCatch(async (req, res, next) => {
           connect: { id: userAddress.id },
         },
       },
+      include: {
+        orderAddress: true
+      }
     });
     console.log('Created Order:', order);
 
@@ -91,7 +94,7 @@ exports.createOrder = tryCatch(async (req, res, next) => {
   
     return order;
   });
-  
+  console.log("transaction", transaction);
   res.status(200).json({
     success: true,
     message: 'Order created and cart deleted successfully',
@@ -107,6 +110,7 @@ exports.getOrderByUserId = tryCatch(async (req, res) => {
     },
     include: {
       user: true,
+      orderAddress: true,
       OrderItems: {
         include: {
           product: true,
