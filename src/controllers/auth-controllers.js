@@ -104,6 +104,7 @@ module.exports.loginGoogle = async (req, res, next) => {
         profileImage : true
       },
     });
+  
     res.status(201).json({ newUser });
   } catch (err) {
     next(err);

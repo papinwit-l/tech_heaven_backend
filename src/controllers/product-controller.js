@@ -915,8 +915,13 @@ module.exports.removeProduct = async (req, res, next) => {
     // step 2 Promise ลบแบบ รอ!
     const deletedImage = product.ProductImages.map(
       (image) =>
-        new Promise((resolve, reject) => {
+        
+        { if(!image.public_id){
+           return 
+          }
+          return new Promise((resolve, reject) => {
           // ลบจาก cloud
+         
           cloudinary.uploader.destroy(image.public_id, (error, result) => {
             if (error) {
               reject(error);
@@ -924,7 +929,7 @@ module.exports.removeProduct = async (req, res, next) => {
               resolve(result);
             }
           });
-        })
+        })}
     );
     await Promise.all(deletedImage);
 
