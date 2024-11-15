@@ -3,6 +3,7 @@ const createError = require("../utils/createError");
 
 const getProductPart = async (categoryId, filter) => {
   const { drive, cpu, motherboard, memory, cooler } = filter;
+  console.log("filter", filter);
   // console.log("filter", filter);
   switch (categoryId) {
     case 1: // CPU
@@ -170,6 +171,33 @@ const getProductPart = async (categoryId, filter) => {
           Drive: true,
         },
       });
+    case 10: // Accessory
+      return await prisma.product.findMany({
+        where: {
+          categoryId: 10,
+          Accessory: {
+            some: {
+              accessoriesType: filter.accessoriesType,
+            },
+          },
+        },
+        include: {
+          ProductImages: true,
+          Accessory: true,
+        },
+      });
+    default: // Accessory
+      if (categoryId >= 11) {
+        return await prisma.product.findMany({
+          where: {
+            categoryId: +categoryId,
+          },
+          include: {
+            ProductImages: true,
+          },
+        });
+      }
+      return createError(400, "Invalid categoryId");
   }
 };
 
@@ -179,6 +207,7 @@ module.exports.getProductByCategoryId = async (req, res, next) => {
     // console.log("body");
     // console.log(req.body);
     const filter = req.body;
+    console.log("sdasdasdsa", filter);
     const products = await getProductPart(categoryId, filter);
     res.json({
       message: "Get Product By CategoryId Success",

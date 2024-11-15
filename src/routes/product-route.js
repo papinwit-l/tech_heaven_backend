@@ -25,6 +25,7 @@ const {
   deleteProductImage,
   getProductByCategoryId,
   createPCBuild,
+  createProductOther,
 } = require("../controllers/product-controller");
 
 // @ENDPOINT http://localhost:8000/product
@@ -59,5 +60,6 @@ router.post(
 );
 router.post("/product/drive", Authenticate.auth, createProductDrive);
 router.post("/product/accessory", Authenticate.auth, createProductAccessory);
+router.post("/product/other", Authenticate.auth, createProductOther);
 
 module.exports = router;
