@@ -5,4 +5,5 @@ const stripeController = require('../controllers/stripe-controller')
 
 stripeRouter.post("/create-payment", authenticate.auth, stripeController.createPayment)
 
+
 module.exports = stripeRouter
