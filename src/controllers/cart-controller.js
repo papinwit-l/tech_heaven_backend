@@ -116,8 +116,8 @@ module.exports.getCart = async (req, res, next) => {
         },
       },
     });
-    console.log(cart);
-    console.log(cart.CartItems);
+    // console.log(cart);
+    // console.log(cart.CartItems);
     if (!cart) {
       return res.status(200).json({ cart: null }); // ถ้าไม่มี cart ให้ส่ง null
     }

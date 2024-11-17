@@ -93,9 +93,9 @@ model Chat {
 
 model Message {
   id               Int                @id @default(autoincrement())
-  chat             Chat               @relation(fields: [chatId], references: [id])
+  chat             Chat               @relation(fields: [chatId], references: [id], onDelete: Cascade)
   chatId           Int                @map("chat_id")
-  user             User               @relation(fields: [userId], references: [id])
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId           Int                @map("user_id")
   message          String
   createdAt        DateTime           @default(now()) @map("created_at")
@@ -105,9 +105,9 @@ model Message {
 
 model ChatNotification {
   id          Int      @id @default(autoincrement())
-  chat        Chat     @relation(fields: [chatId], references: [id])
+  chat        Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
   chatId      Int      @map("chat_id")
-  message     Message? @relation(fields: [messageId], references: [id])
+  message     Message? @relation(fields: [messageId], references: [id], onDelete: Cascade)
   messageId   Int?     @map("message_id")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")

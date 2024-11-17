@@ -128,8 +128,8 @@ exports.updateUser = async (req, res, next) => {
     });
     res.status(200).json(user);
   } catch (err) {
-    console.log(err);
     next(err);
+    console.log(err);
   }
 };
 
@@ -143,9 +143,9 @@ exports.deleteUser = async (req, res, next) => {
     });
   } catch (err) {
     console.log(err);
+    next(err);
   }
   // res.status(200).json("Delete Successfully")
-  next(err);
 };
 
 module.exports.createCoupon = async (req, res, next) => {
